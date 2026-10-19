@@ -1,0 +1,183 @@
+.game {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  /* Quick repeated taps shouldn't select text. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.game-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  min-height: 0;
+  padding: 36px;
+}
+
+.game-timer {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-penalty {
+  color: var(--red);
+  font-weight: 800;
+  animation: penalty-fade 0.9s ease-out forwards;
+}
+
+@keyframes penalty-fade {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+/* ---------- Spot the difference ---------- */
+
+.scenes {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  min-height: 0;
+}
+
+.scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  cursor: crosshair;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.scene-found {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 5;
+}
+
+.scene-hint {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-dasharray: 8 6;
+  animation: hint-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes hint-pulse {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.25;
+  }
+}
+
+.scene-miss path {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 4;
+  stroke-linecap: square;
+}
+
+.scene-miss {
+  animation: miss-fade 0.8s ease-out forwards;
+}
+
+@keyframes miss-fade {
+  to {
+    opacity: 0;
+  }
+}
+
+.game-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.found-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 22px;
+}
+
+.found-meter span {
+  width: 32px;
+  height: 32px;
+  background: var(--grey-3);
+}
+
+.found-meter span.found {
+  background: var(--red);
+}
+
+.found-meter output {
+  margin-left: 10px;
+}
+
+/* ---------- Placeholder for games without a design ---------- */
+
+.game-placeholder {
+  align-self: center;
+  max-width: 560px;
+  margin: auto;
+  font-size: 20px;
+}
+
+.game-placeholder h2 {
+  font-size: 32px;
+  font-weight: 900;
+}
+
+.game-placeholder svg {
+  width: 140px;
+  height: 94px;
+}
+
+@media (max-width: 760px) {
+  .game-body {
+    gap: 12px;
+    padding: 20px;
+  }
+
+  .scenes {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .found-meter {
+    gap: 6px;
+    font-size: 16px;
+  }
+
+  .found-meter span {
+    width: 24px;
+    height: 24px;
+  }
+
+  .found-meter output {
+    margin-left: 6px;
+  }
+
+  .game-placeholder {
+    font-size: 17px;
+  }
+
+  .game-placeholder h2 {
+    font-size: 26px;
+  }
+}
