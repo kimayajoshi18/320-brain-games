@@ -32,7 +32,7 @@ export function rollToDay(state: AppState, today: DayKey): AppState {
 export function recordResult(state: AppState, result: GameResult): AppState {
   const daily = !state.todayResults[result.gameId]
   const previous = state.topScores[result.gameId]
-  const newBest = previous.length > 0 && result.points > previous[0].points
+  const newBest = previous.length === 0 || result.points > previous[0].points
   const topScores = {
     ...state.topScores,
     [result.gameId]: [...previous, result].sort((a, b) => b.points - a.points).slice(0, 3),

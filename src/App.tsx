@@ -5,6 +5,7 @@ import Home from './screens/Home.tsx'
 import Landing from './screens/Landing.tsx'
 import Onboarding from './screens/Onboarding.tsx'
 import Play from './screens/Play.tsx'
+import Results from './screens/Results.tsx'
 
 export default function App() {
   return (
@@ -15,7 +16,7 @@ export default function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/home" element={<Home />} />
           <Route path="/play/:gameId" element={<Play />} />
-          <Route path="/results" element={<ComingSoon name="Results" />} />
+          <Route path="/results" element={<Results />} />
           <Route path="/profile" element={<ComingSoon name="Profile" />} />
           <Route path="/friends" element={<ComingSoon name="Friends" />} />
           <Route path="/path" element={<ComingSoon name="Learning path" />} />
