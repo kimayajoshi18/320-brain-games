@@ -136,6 +136,28 @@
   color: var(--muted);
 }
 
+/* Tablets: not enough room for the cards and the streak panel side by side. */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .home {
+    grid-template-columns: 1fr;
+  }
+
+  .streak-panel {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 20px;
+  }
+
+  .streak-number {
+    font-size: 48px;
+  }
+
+  .streak-panel .week-bar {
+    flex: 1 1 200px;
+  }
+}
+
 @media (max-width: 760px) {
   .home {
     grid-template-columns: 1fr;

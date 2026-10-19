@@ -215,6 +215,24 @@ a.path-item:hover .path-label {
   display: none;
 }
 
+/* Tablets: the sidebar moves above the path. */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .learning {
+    grid-template-columns: 1fr;
+  }
+
+  .learning-side {
+    position: static;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    order: -1;
+  }
+
+  .learning-legend {
+    grid-column: 1 / -1;
+  }
+}
+
 @media (max-width: 760px) {
   .learning {
     --node: 52px;
@@ -231,8 +249,14 @@ a.path-item:hover .path-label {
     font-size: 15px;
   }
 
+  .path-item {
+    right: 0;
+  }
+
   .path-label {
     font-size: 15px;
+    line-height: 1.2;
+    white-space: normal;
   }
 
   .path-label .long {
