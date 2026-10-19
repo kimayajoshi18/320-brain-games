@@ -1,0 +1,237 @@
+/*
+ * Puzzlr design tokens and shared primitives, taken from the
+ * "Puzzlr Wireframes" design: Archivo, heavy black rules, one accent color.
+ */
+:root {
+  --red: #881c1c;
+  --red-dark: #5e1313;
+  --ink: #111;
+  --paper: #fff;
+  --muted: #444;
+  --faint: #666;
+  --grey-1: #eee;
+  --grey-2: #e6e6e6;
+  --grey-3: #ddd;
+  --grey-4: #999;
+
+  --rule: 4px solid var(--ink);
+  --rule-thin: 3px solid var(--ink);
+
+  --font: 'Archivo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --header-h: 64px;
+  --tabbar-h: 52px;
+  --content-w: 1200px;
+
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--paper);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+a {
+  color: var(--red);
+}
+
+a:hover {
+  color: var(--red-dark);
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--red);
+  outline-offset: 3px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 26px;
+  border: 3px solid transparent;
+  border-radius: 0;
+  background: none;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.btn-primary {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--red-dark);
+  border-color: var(--red-dark);
+  color: #fff;
+}
+
+.btn-dark {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: #fff;
+}
+
+.btn-dark:hover:not(:disabled) {
+  background: #333;
+  border-color: #333;
+  color: #fff;
+}
+
+.btn-outline {
+  border-color: var(--ink);
+  color: var(--ink);
+}
+
+.btn-outline:hover:not(:disabled) {
+  background: var(--grey-1);
+  color: var(--ink);
+}
+
+.btn-sm {
+  padding: 9px 16px;
+  font-size: 18px;
+}
+
+.btn-block {
+  display: flex;
+  width: 100%;
+}
+
+/* ---------- Small pieces ---------- */
+
+.badge {
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--red);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: var(--rule-thin);
+  background: none;
+  color: var(--ink);
+  font-size: 18px;
+  text-decoration: none;
+}
+
+a.chip:hover,
+button.chip:hover {
+  background: var(--grey-1);
+  color: var(--ink);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 22px;
+  border: var(--rule);
+}
+
+.panel-accent {
+  border-color: var(--red);
+}
+
+.panel-dark {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.eyebrow {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Grey box standing in for art that hasn't been drawn yet. */
+.placeholder-art {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--grey-2);
+  color: #555;
+  font: 16px var(--mono);
+}
+
+@media (max-width: 760px) {
+  .btn {
+    padding: 13px 18px;
+    font-size: 20px;
+  }
+
+  .btn-sm {
+    padding: 9px 14px;
+    font-size: 17px;
+  }
+
+  .badge {
+    padding: 4px 8px;
+    font-size: 15px;
+  }
+}

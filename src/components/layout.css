@@ -1,0 +1,241 @@
+/* ---------- Brand ---------- */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--ink);
+  font-size: 26px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.brand:hover {
+  color: var(--ink);
+}
+
+.brand-mark {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  background: var(--red);
+}
+
+/* ---------- App shell ---------- */
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: var(--header-h);
+  padding: 0 24px;
+  border-bottom: var(--rule);
+  background: var(--paper);
+}
+
+.app-header-right {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.app-header-right a {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.app-header-right a:hover {
+  text-decoration: underline;
+}
+
+.app-header-right .mobile-only {
+  display: none;
+}
+
+.app-nav {
+  display: flex;
+  gap: 28px;
+  font-size: 20px;
+}
+
+.app-nav a {
+  padding: 4px 0 2px;
+  border-bottom: 4px solid transparent;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.app-nav a:hover {
+  border-bottom-color: var(--grey-3);
+}
+
+.app-nav a.active {
+  border-bottom-color: var(--red);
+  font-weight: 800;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--content-w);
+  margin: 0 auto;
+  padding: 36px;
+}
+
+.tab-bar {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header-h: 56px;
+  }
+
+  .app-header {
+    padding: 0 18px;
+  }
+
+  .brand {
+    gap: 8px;
+    font-size: 22px;
+  }
+
+  .brand-mark {
+    width: 22px;
+    height: 22px;
+  }
+
+  .app-header-right {
+    font-size: 17px;
+  }
+
+  .app-header-right:has(.mobile-only) .desktop-only {
+    display: none;
+  }
+
+  .app-header-right .mobile-only {
+    display: contents;
+  }
+
+  .app-nav {
+    display: none;
+  }
+
+  .app-main {
+    padding: 20px;
+  }
+
+  .app-shell.has-tabs .app-main {
+    padding-bottom: calc(var(--tabbar-h) + 24px);
+  }
+
+  .tab-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    height: var(--tabbar-h);
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: var(--rule);
+    background: var(--paper);
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .tab-bar a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .tab-bar a.active {
+    background: var(--ink);
+    color: #fff;
+    font-weight: 800;
+  }
+}
+
+/* ---------- Task header (games and results) ---------- */
+
+.task-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+  height: var(--header-h);
+  padding: 0 24px;
+  border-bottom: var(--rule);
+  background: var(--paper);
+  font-size: 20px;
+}
+
+.task-header > :first-child {
+  justify-self: start;
+}
+
+.task-header > :last-child {
+  justify-self: end;
+  font-variant-numeric: tabular-nums;
+}
+
+.task-header-title {
+  font-size: inherit;
+  font-weight: 800;
+  text-align: center;
+}
+
+.task-header-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.task-header-close:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.task-header .short {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .task-header {
+    padding: 0 18px;
+    font-size: 17px;
+  }
+
+  .task-header .long {
+    display: none;
+  }
+
+  .task-header .short {
+    display: inline;
+  }
+}
