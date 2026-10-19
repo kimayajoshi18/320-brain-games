@@ -38,6 +38,7 @@ function loadInitialState(): AppState {
 type Action =
   | { type: 'newDay'; today: string }
   | { type: 'replace'; state: AppState }
+  | { type: 'signIn'; account: AppState }
   | { type: 'completeOnboarding'; answers: Parameters<AppActions['completeOnboarding']>[0] }
   | { type: 'recordResult'; result: Parameters<AppActions['recordResult']>[0] }
   | { type: 'updateProfile'; changes: Parameters<AppActions['updateProfile']>[0] }
@@ -48,6 +49,8 @@ function reducer(state: AppState, action: Action): AppState {
       return store.rollToDay(state, action.today)
     case 'replace':
       return action.state
+    case 'signIn':
+      return state.account.kind === 'google' ? state : store.mergeGuestIntoAccount(action.account, state)
     case 'completeOnboarding':
       return store.completeOnboarding(state, action.answers)
     case 'recordResult':
@@ -87,10 +90,10 @@ export default function AppStateProvider({ children }: { children: ReactNode }) 
       recordResult: (result) => dispatch({ type: 'recordResult', result }),
       updateProfile: (changes) => dispatch({ type: 'updateProfile', changes }),
       signIn: () => {
-        const guest = latest.current
         const account = read(localStorage, ACCOUNT_KEY) ?? createDemoAccount(todayKey())
         sessionStorage.removeItem(GUEST_KEY)
-        dispatch({ type: 'replace', state: store.mergeGuestIntoAccount(account, guest) })
+        dispatch({ type: 'signIn', account })
+        return { onboarded: account.onboarding.complete || latest.current.onboarding.complete }
       },
       signOut: () => {
         localStorage.removeItem(SIGNED_IN_KEY)

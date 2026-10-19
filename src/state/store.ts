@@ -74,9 +74,8 @@ export function updateProfile(state: AppState, changes: Partial<Profile>): AppSt
  */
 export function mergeGuestIntoAccount(account: AppState, guest: AppState): AppState {
   let merged = rollToDay(account, guest.today)
-  if (!merged.onboarding.complete && guest.onboarding.complete) {
-    merged = { ...merged, onboarding: guest.onboarding }
-  }
+  // Answers the guest just gave are newer than whatever the account has.
+  if (guest.onboarding.complete) merged = { ...merged, onboarding: guest.onboarding }
   for (const id of GAME_IDS) {
     const result = guest.todayResults[id]
     if (result) merged = recordResult(merged, result)

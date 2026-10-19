@@ -1,0 +1,128 @@
+.landing .app-main {
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  padding: 0;
+}
+
+.landing-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+  max-width: var(--content-w);
+  margin: 0 auto;
+  padding: 72px 48px;
+}
+
+.landing-art {
+  display: none;
+}
+
+.landing-title {
+  max-width: 18ch;
+  text-wrap: balance;
+  font-size: 52px;
+  font-weight: 900;
+  line-height: 1.05;
+}
+
+.landing-sub {
+  font-size: 24px;
+  color: var(--muted);
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.landing-note {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.landing-games {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: auto;
+  border-top: var(--rule);
+}
+
+.landing-game {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+}
+
+.landing-game + .landing-game {
+  border-left: var(--rule);
+}
+
+.landing-game svg {
+  width: 72px;
+  height: 48px;
+  flex: none;
+}
+
+.landing-game b {
+  display: block;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.landing-game span {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .landing-hero {
+    flex: 1;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .landing-art {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    height: 170px;
+    padding: 16px;
+    background: var(--grey-2);
+  }
+
+  .landing-art svg {
+    width: 30%;
+    height: 100%;
+  }
+
+  .landing-title {
+    font-size: 32px;
+  }
+
+  .landing-sub {
+    font-size: 18px;
+  }
+
+  .landing-actions {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: auto;
+  }
+
+  .landing-actions .btn {
+    width: 100%;
+  }
+
+  .landing-note {
+    font-size: 15px;
+    text-align: center;
+  }
+
+  .landing-games {
+    display: none;
+  }
+}

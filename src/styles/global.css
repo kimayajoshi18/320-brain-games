@@ -150,6 +150,23 @@ button {
   width: 100%;
 }
 
+/* A button that reads as plain text, for header actions like "Log in". */
+.link-button {
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.link-button:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
 /* ---------- Small pieces ---------- */
 
 .badge {

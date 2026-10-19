@@ -5,8 +5,11 @@ export interface AppActions {
   completeOnboarding: (answers: Omit<Onboarding, 'complete'>) => void
   recordResult: (result: GameResult) => void
   updateProfile: (changes: Partial<Profile>) => void
-  /** Mock Google sign-in. Keeps any progress made as a guest. */
-  signIn: () => void
+  /**
+   * Mock Google sign-in. Keeps any progress made as a guest.
+   * Returns whether the player has already been through onboarding.
+   */
+  signIn: () => { onboarded: boolean }
   signOut: () => void
 }
 
