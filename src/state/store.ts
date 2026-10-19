@@ -2,13 +2,6 @@ import { GAME_IDS, type GameId } from '../data/games.ts'
 import { addDays, weekdayIndex, type DayKey } from '../lib/date.ts'
 import type { AppState, GameResult, Onboarding, Profile } from './types.ts'
 
-export const STREAK_REWARDS: { day: number; tier: string }[] = [
-  { day: 3, tier: 'bronze' },
-  { day: 7, tier: 'silver' },
-  { day: 14, tier: 'gold' },
-  { day: 30, tier: 'platinum' },
-]
-
 export function createGuestState(today: DayKey): AppState {
   return {
     account: { kind: 'guest' },
@@ -128,9 +121,4 @@ export function bestResult(state: AppState, gameId: GameId): GameResult | undefi
 export function bestPoints(state: AppState, since?: DayKey): number {
   const all = GAME_IDS.flatMap((id) => state.topScores[id])
   return all.filter((r) => !since || r.playedAt >= since).reduce((max, r) => Math.max(max, r.points), 0)
-}
-
-export function nextReward(state: AppState): { day: number; tier: string } | undefined {
-  const streak = currentStreak(state)
-  return STREAK_REWARDS.find((r) => r.day > streak)
 }

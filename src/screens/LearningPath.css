@@ -1,0 +1,255 @@
+.learning {
+  --node: 72px;
+  --gap: 22px;
+  --col-w: 130px;
+  --pad: 40px;
+  --line: 6px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 32px;
+}
+
+.path {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.path-earlier {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 18px var(--pad);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.path-step {
+  position: relative;
+  height: calc(var(--node) + var(--gap));
+}
+
+.path-step:last-child {
+  height: var(--node);
+}
+
+/* The elbow joining a step to the next one: down, across, down. */
+.path-step::before,
+.path-step::after,
+.path-link {
+  content: '';
+  position: absolute;
+  background: var(--ink);
+}
+
+.path-step::before {
+  left: calc(var(--pad) + var(--col) * var(--col-w) + var(--node) / 2 - var(--line) / 2);
+  top: var(--node);
+  width: var(--line);
+  height: calc(var(--gap) / 2 + var(--line) / 2);
+}
+
+.path-link {
+  left: calc(var(--pad) + var(--min-col) * var(--col-w) + var(--node) / 2 - var(--line) / 2);
+  top: calc(var(--node) + var(--gap) / 2 - var(--line) / 2);
+  width: calc(var(--span) * var(--col-w) + var(--line));
+  height: var(--line);
+}
+
+.path-step::after {
+  left: calc(var(--pad) + var(--next-col) * var(--col-w) + var(--node) / 2 - var(--line) / 2);
+  top: calc(var(--node) + var(--gap) / 2);
+  width: var(--line);
+  height: calc(var(--gap) / 2);
+}
+
+.path-step:last-child::before,
+.path-step:last-child::after {
+  display: none;
+}
+
+.path-item {
+  position: absolute;
+  top: 0;
+  left: calc(var(--pad) + var(--col) * var(--col-w));
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.path-node {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--node);
+  height: var(--node);
+  flex: none;
+  background: var(--grey-2);
+  color: var(--faint);
+  font-size: calc(var(--node) * 0.4);
+  font-weight: 900;
+}
+
+.path-node::before {
+  content: '';
+  width: calc(var(--node) * 0.25);
+  height: calc(var(--node) * 0.25);
+  background: var(--grey-4);
+}
+
+.path-label {
+  font-size: 20px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.path-label .short {
+  display: none;
+}
+
+.is-locked .path-label {
+  color: #888;
+}
+
+.is-done .path-node {
+  background: var(--red);
+  color: #fff;
+}
+
+.is-done .path-node::before {
+  content: '✓';
+  width: auto;
+  height: auto;
+  background: none;
+}
+
+.is-today .path-node {
+  border: 6px solid var(--red);
+  background: var(--paper);
+  color: var(--red);
+}
+
+.is-today .path-node::before {
+  content: '▶';
+  width: auto;
+  height: auto;
+  background: none;
+}
+
+.is-today .path-label,
+.is-reward .path-label {
+  font-weight: 800;
+}
+
+a.path-item:hover .path-label {
+  text-decoration: underline;
+}
+
+/* Streak rewards: a dashed box with a medal-ish square inside. */
+.is-reward .path-node {
+  border: 4px dashed var(--grey-4);
+  background: var(--paper);
+}
+
+.is-reward .path-node::before {
+  content: '';
+  width: calc(var(--node) * 0.42);
+  height: calc(var(--node) * 0.42);
+  background: #ccc;
+}
+
+.is-reward.is-done .path-node,
+.is-reward.is-today .path-node {
+  border-color: var(--red);
+}
+
+.is-reward.is-today .path-node {
+  border-width: 6px;
+}
+
+.is-reward.is-done .path-node::before,
+.is-reward.is-today .path-node::before {
+  background: var(--ink);
+}
+
+.learning-side {
+  position: sticky;
+  top: calc(var(--header-h) + 24px);
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.learning-side .panel b {
+  font-size: 22px;
+}
+
+.learning-side .panel span {
+  font-size: 17px;
+}
+
+.reward-bar {
+  height: 14px;
+  background: var(--grey-2);
+}
+
+.reward-bar div {
+  height: 100%;
+  background: var(--red);
+}
+
+.learning-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.learning-start-mobile {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .learning {
+    --node: 52px;
+    --gap: 34px;
+    --col-w: 60px;
+    --pad: 10px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .path-earlier {
+    font-size: 15px;
+  }
+
+  .path-label {
+    font-size: 15px;
+  }
+
+  .path-label .long {
+    display: none;
+  }
+
+  .path-label .short {
+    display: inline;
+  }
+
+  .learning-side {
+    display: none;
+  }
+
+  .learning-start-mobile {
+    position: sticky;
+    bottom: calc(var(--tabbar-h) + 12px);
+    display: flex;
+  }
+}
