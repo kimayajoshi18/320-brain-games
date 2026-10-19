@@ -3,7 +3,7 @@ import GameArt from '../components/GameArt.tsx'
 import MainShell from '../components/MainShell.tsx'
 import WeekBar from '../components/WeekBar.tsx'
 import { GAMES, type GameId } from '../data/games.ts'
-import { formatNumber } from '../lib/format.ts'
+import { formatNumber, plural } from '../lib/format.ts'
 import { useAppState } from '../state/context.ts'
 import { currentStreak, dailyDoneCount, dailyOrder, nextDailyGame, weekCells } from '../state/store.ts'
 import './Home.css'
@@ -72,7 +72,7 @@ export default function Home() {
 
           {done === 3 && (
             <p className="all-done">
-              That's today's three. Your streak is now <b>{streak} days</b>. See you tomorrow!
+              That's today's three. Your streak is now <b>{plural(streak, 'day')}</b>. See you tomorrow!
             </p>
           )}
 

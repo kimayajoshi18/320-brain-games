@@ -4,15 +4,15 @@ import AppShell from '../components/AppShell.tsx'
 import GameArt from '../components/GameArt.tsx'
 import { GAMES, GAME_IDS, type GameId } from '../data/games.ts'
 import { useAppState } from '../state/context.ts'
-import { dailyOrder } from '../state/store.ts'
+import { dailyOrder, reminderFor } from '../state/store.ts'
 import type { PlayTime } from '../state/types.ts'
 import './Onboarding.css'
 
-const PLAY_TIMES: { id: PlayTime; label: string; short: string; reminder: string | null }[] = [
-  { id: 'commute', label: 'On my commute (offline)', short: 'On my commute', reminder: '8:00am' },
-  { id: 'morning', label: 'Morning', short: 'Morning', reminder: '8:00am' },
-  { id: 'evening', label: 'Evening', short: 'Evening', reminder: '7:00pm' },
-  { id: 'whenever', label: 'Whenever I remember', short: 'Whenever', reminder: null },
+const PLAY_TIMES: { id: PlayTime; label: string; short: string }[] = [
+  { id: 'commute', label: 'On my commute (offline)', short: 'On my commute' },
+  { id: 'morning', label: 'Morning', short: 'Morning' },
+  { id: 'evening', label: 'Evening', short: 'Evening' },
+  { id: 'whenever', label: 'Whenever I remember', short: 'Whenever' },
 ]
 
 const STEP_COUNT = 3
@@ -25,7 +25,7 @@ export default function Onboarding() {
   const [when, setWhen] = useState<PlayTime | null>(state.onboarding.when)
 
   const signedIn = state.account.kind === 'google'
-  const playTime = PLAY_TIMES.find((t) => t.id === when)
+  const reminder = when ? reminderFor(when) : null
   const plan = dailyOrder({ ...state, onboarding: { complete: true, focus, when } })
   const canContinue = step === 0 ? focus.length > 0 : step === 1 ? when !== null : true
 
@@ -35,7 +35,6 @@ export default function Onboarding() {
   const finish = (withGoogle: boolean) => {
     actions.completeOnboarding({ focus, when })
     if (withGoogle) actions.signIn()
-    if (withGoogle || signedIn) actions.updateProfile({ reminder: playTime?.reminder ?? null })
     navigate('/home')
   }
 
@@ -121,9 +120,7 @@ export default function Onboarding() {
               ))}
             </ol>
             <p className="plan-reminder">
-              {playTime?.reminder
-                ? `We'll remind you at ${playTime.reminder}.`
-                : 'No reminders. Play whenever you like.'}
+              {reminder ? `We'll remind you at ${reminder}.` : 'No reminders. Play whenever you like.'}
               {when === 'commute' && ' Games work offline, so no signal is fine.'}
             </p>
             {!signedIn && (

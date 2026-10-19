@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router'
 import TaskHeader from '../components/TaskHeader.tsx'
 import { GAMES } from '../data/games.ts'
-import { formatNumber } from '../lib/format.ts'
+import { formatNumber, plural } from '../lib/format.ts'
 import { useAppState } from '../state/context.ts'
 import { currentStreak, dailyDoneCount, nextDailyGame } from '../state/store.ts'
 import type { GameResult } from '../state/types.ts'
@@ -72,7 +72,7 @@ export default function Results() {
             <div className="panel panel-accent results-streak" role="status">
               <strong>+1</strong>
               <span>
-                All three done. Your streak is now <b>{currentStreak(state)} days</b>.
+                All three done. Your streak is now <b>{plural(currentStreak(state), 'day')}</b>.
               </span>
             </div>
           )}

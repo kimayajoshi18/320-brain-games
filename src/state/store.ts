@@ -1,6 +1,18 @@
 import { GAME_IDS, type GameId } from '../data/games.ts'
 import { addDays, weekdayIndex, type DayKey } from '../lib/date.ts'
-import type { AppState, GameResult, Onboarding, Profile } from './types.ts'
+import type { AppState, GameResult, Onboarding, PlayTime, Profile } from './types.ts'
+
+const REMINDERS: Record<PlayTime, string | null> = {
+  commute: '8:00am',
+  morning: '8:00am',
+  evening: '7:00pm',
+  whenever: null,
+}
+
+/** Default daily reminder for when the player said they usually play. */
+export function reminderFor(when: PlayTime): string | null {
+  return REMINDERS[when]
+}
 
 export function createGuestState(today: DayKey): AppState {
   return {
@@ -53,7 +65,8 @@ export function recordResult(state: AppState, result: GameResult): AppState {
 }
 
 export function completeOnboarding(state: AppState, answers: Omit<Onboarding, 'complete'>): AppState {
-  return { ...state, onboarding: { ...answers, complete: true } }
+  const next = { ...state, onboarding: { ...answers, complete: true } }
+  return answers.when ? updateProfile(next, { reminder: reminderFor(answers.when) }) : next
 }
 
 export function updateProfile(state: AppState, changes: Partial<Profile>): AppState {
@@ -67,8 +80,12 @@ export function updateProfile(state: AppState, changes: Partial<Profile>): AppSt
  */
 export function mergeGuestIntoAccount(account: AppState, guest: AppState): AppState {
   let merged = rollToDay(account, guest.today)
-  // Answers the guest just gave are newer than whatever the account has.
-  if (guest.onboarding.complete) merged = { ...merged, onboarding: guest.onboarding }
+  // Survey answers the guest just gave are newer than whatever the account has.
+  // A guest who skipped the survey doesn't overwrite anything.
+  const answers = guest.onboarding
+  if (answers.complete && (answers.when !== null || answers.focus.length > 0)) {
+    merged = completeOnboarding(merged, { focus: answers.focus, when: answers.when })
+  }
   for (const id of GAME_IDS) {
     const result = guest.todayResults[id]
     if (result) merged = recordResult(merged, result)
