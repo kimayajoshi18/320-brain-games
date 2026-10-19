@@ -1,0 +1,223 @@
+.home {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 32px;
+}
+
+.home-main {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.home-title {
+  font-size: 40px;
+  font-weight: 900;
+}
+
+.home-week {
+  display: none;
+}
+
+.guest-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 12px;
+  padding: 12px 16px;
+  background: var(--grey-1);
+  font-size: 18px;
+}
+
+.guest-note .link-button {
+  color: var(--red);
+  font-weight: 800;
+  text-decoration: underline;
+}
+
+.daily-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.daily-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 230px;
+  padding: 17px;
+  border: var(--rule-thin);
+}
+
+.daily-card-art {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  padding: 12px;
+  background: var(--grey-2);
+}
+
+.daily-card-art svg {
+  width: 100%;
+  max-width: 140px;
+  height: 100%;
+  max-height: 96px;
+}
+
+.daily-card b {
+  font-size: 20px;
+}
+
+.daily-card-status {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.daily-card.is-done {
+  border-color: var(--grey-1);
+  background: var(--grey-1);
+}
+
+.daily-card.is-done .daily-card-art {
+  background: var(--grey-3);
+}
+
+.daily-card.is-next {
+  padding: 16px;
+  border: 4px solid var(--red);
+}
+
+.daily-card .title-mobile {
+  display: none;
+}
+
+.all-done {
+  font-size: 20px;
+}
+
+.practice-title {
+  margin-top: 8px;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.practice-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.streak-panel {
+  align-self: start;
+  gap: 14px;
+  padding: 24px;
+}
+
+.streak-number {
+  color: var(--red);
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.streak-label {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.streak-hint {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+@media (max-width: 760px) {
+  .home {
+    grid-template-columns: 1fr;
+  }
+
+  .home-main {
+    gap: 12px;
+  }
+
+  .home-title {
+    font-size: 28px;
+  }
+
+  .home-title .desktop-only {
+    display: none;
+  }
+
+  .home-week {
+    display: grid;
+  }
+
+  .home-week span {
+    height: 20px;
+  }
+
+  .guest-note {
+    font-size: 15px;
+  }
+
+  .daily-cards {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .daily-card {
+    min-height: 0;
+    padding: 12px;
+    font-size: 18px;
+  }
+
+  .daily-card.is-next {
+    padding: 12px;
+  }
+
+  .daily-card-art,
+  .daily-card .title-desktop {
+    display: none;
+  }
+
+  .daily-card .title-mobile {
+    display: inline;
+  }
+
+  .daily-card b {
+    font-size: 18px;
+  }
+
+  .daily-card.is-done,
+  .daily-card.is-upcoming {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+
+  .daily-card.is-done {
+    padding: 14px;
+  }
+
+  .daily-card.is-done b,
+  .daily-card.is-upcoming b {
+    font-weight: 400;
+  }
+
+  .daily-card-status {
+    font-size: 16px;
+  }
+
+  .practice-title {
+    font-size: 18px;
+  }
+
+  .streak-panel {
+    display: none;
+  }
+}

@@ -159,6 +159,23 @@
   }
 }
 
+/* ---------- Week bar ---------- */
+
+.week-bar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.week-bar span {
+  height: 24px;
+  background: var(--grey-3);
+}
+
+.week-bar span.done {
+  background: var(--red);
+}
+
 /* ---------- Task header (games and results) ---------- */
 
 .task-header {
