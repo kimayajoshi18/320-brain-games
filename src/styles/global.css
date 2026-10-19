@@ -236,7 +236,20 @@ button.chip:hover {
   font: 16px var(--mono);
 }
 
+/* Swap content between the desktop and mobile wireframes. */
+.mobile-only {
+  display: none;
+}
+
 @media (max-width: 760px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: revert;
+  }
+
   .btn {
     padding: 13px 18px;
     font-size: 20px;

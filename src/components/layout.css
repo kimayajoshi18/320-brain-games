@@ -59,10 +59,6 @@
   text-decoration: underline;
 }
 
-.app-header-right .mobile-only {
-  display: none;
-}
-
 .app-nav {
   display: flex;
   gap: 28px;
@@ -118,14 +114,6 @@
 
   .app-header-right {
     font-size: 17px;
-  }
-
-  .app-header-right:has(.mobile-only) .desktop-only {
-    display: none;
-  }
-
-  .app-header-right .mobile-only {
-    display: contents;
   }
 
   .app-nav {
