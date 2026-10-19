@@ -1,6 +1,6 @@
-# Puzzlr frontend
+# 320-brain-games
 
-Browser app for Puzzlr, built from the "Puzzlr Wireframes" design: three short brain games a day, streaks, a learning path, friends and a profile. It works on desktop and phones.
+Puzzlr is a browser app built from the "Puzzlr Wireframes" design: three short brain games a day, streaks, a learning path, friends and a profile. It works on desktop and phones.
 
 Built with React, TypeScript, React Router and Vite.
 
@@ -9,7 +9,6 @@ Built with React, TypeScript, React Router and Vite.
 You need Node 22.22 or newer.
 
 ```sh
-cd frontend
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check and build to dist/
