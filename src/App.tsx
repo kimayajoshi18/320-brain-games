@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import AppStateProvider from './state/AppStateProvider.tsx'
 import ComingSoon from './screens/ComingSoon.tsx'
+import Friends from './screens/Friends.tsx'
 import Home from './screens/Home.tsx'
 import Landing from './screens/Landing.tsx'
 import Onboarding from './screens/Onboarding.tsx'
@@ -19,7 +20,7 @@ export default function App() {
           <Route path="/play/:gameId" element={<Play />} />
           <Route path="/results" element={<Results />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/friends" element={<ComingSoon name="Friends" />} />
+          <Route path="/friends" element={<Friends />} />
           <Route path="/path" element={<ComingSoon name="Learning path" />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
