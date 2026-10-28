@@ -8,7 +8,10 @@ Built with React, TypeScript, React Router and Vite.
 
 You need Node 22.22 or newer.
 
+The app lives in `frontend/`.
+
 ```sh
+cd frontend
 npm install
 npm run dev      # http://localhost:5173
 npm run build    # type-check and build to dist/
@@ -19,14 +22,14 @@ npm run lint
 
 | Wireframe        | Route           | File                          |
 | ---------------- | --------------- | ----------------------------- |
-| 01 Landing       | `/`             | `src/screens/Landing.tsx`     |
-| 02 Onboarding    | `/onboarding`   | `src/screens/Onboarding.tsx`  |
-| 03 Home          | `/home`         | `src/screens/Home.tsx`        |
-| 06 Color game    | `/play/colors`  | `src/games/colors/`           |
-| 07 Results       | `/results`      | `src/screens/Results.tsx`     |
-| 08 Profile       | `/profile`      | `src/screens/Profile.tsx`     |
-| 09 Friends       | `/friends`      | `src/screens/Friends.tsx`     |
-| 10 Learning path | `/path`         | `src/screens/LearningPath.tsx`|
+| 01 Landing       | `/`             | `frontend/src/screens/Landing.tsx`     |
+| 02 Onboarding    | `/onboarding`   | `frontend/src/screens/Onboarding.tsx`  |
+| 03 Home          | `/home`         | `frontend/src/screens/Home.tsx`        |
+| 06 Color game    | `/play/colors`  | `frontend/src/games/colors/`           |
+| 07 Results       | `/results`      | `frontend/src/screens/Results.tsx`     |
+| 08 Profile       | `/profile`      | `frontend/src/screens/Profile.tsx`     |
+| 09 Friends       | `/friends`      | `frontend/src/screens/Friends.tsx`     |
+| 10 Learning path | `/path`         | `frontend/src/screens/LearningPath.tsx`|
 
 Each screen has a desktop layout and a phone layout (below 760px wide), matching the two frames in the wireframes.
 
@@ -34,17 +37,17 @@ Each screen has a desktop layout and a phone layout (below 760px wide), matching
 
 There's no backend yet, so a few things are stand-ins:
 
-- **Google sign-in is real once Supabase is set up.** Copy `.env.example` to `.env.local` and fill in the project URL and anon key. Without those two values the app falls back to the demo sign-in below, so nothing breaks for people who have not set it up. In Supabase, turn on Authentication > Providers > Google, and add `http://localhost:5173` (and the Vercel URL) under Authentication > URL Configuration > Redirect URLs. Game progress is still saved in `localStorage` (one entry per user); the game tables are not connected yet.
+- **Google sign-in is real once Supabase is set up.** In `frontend/`, copy `.env.example` to `.env.local` and fill in the project URL and anon key. Without those two values the app falls back to the demo sign-in below, so nothing breaks for people who have not set it up. In Supabase, turn on Authentication > Providers > Google, and add `http://localhost:5173` (and the Vercel URL) under Authentication > URL Configuration > Redirect URLs. Game progress is still saved in `localStorage` (one entry per user); the game tables are not connected yet.
 - **Demo sign-in (no Supabase).** "Continue with Google" or "Log in" signs you in as a demo player, Sam R., with a 12-day streak and some scores. Anything you did as a guest is kept when you sign in.
 - **Saving.** Signed-in progress is stored in `localStorage`. Guest progress only lasts for the browser tab, matching "progress isn't saved until they sign in". To start over, clear the site's storage.
-- **Friends** on the leaderboard are made-up data in `src/data/mock.ts`.
+- **Friends** on the leaderboard are made-up data in `frontend/src/data/mock.ts`.
 - **Memory and Numbers** don't have wireframes yet. Their screens are placeholders with a "Finish with a sample score" button so the rest of the flow can be tried.
 - **"Why this helps"** text on the results screen still needs real sources.
 - **Not built yet:** working offline, sending reminders, and sending invites to contacts.
 
 Spot The Difference is fully playable. Wrong taps add 3 seconds, hints add 5, and you can't fail. Everyone gets the same puzzle each day; practice rounds get a new one.
 
-## Layout of `src/`
+## Layout of `frontend/src/`
 
 ```
 components/   shared layout: app shell and nav, game header, week bar, game art
@@ -56,4 +59,4 @@ state/        app state: types, pure store functions, React provider
 styles/       design tokens and shared button/panel styles
 ```
 
-Game rules live in `src/state/store.ts` as plain functions (no React), so they're easy to test or move to a server later: what counts toward the daily three, streaks, top scores, and merging guest progress on sign-in.
+Game rules live in `frontend/src/state/store.ts` as plain functions (no React), so they're easy to test or move to a server later: what counts toward the daily three, streaks, top scores, and merging guest progress on sign-in.
