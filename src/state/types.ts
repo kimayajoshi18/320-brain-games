@@ -28,7 +28,7 @@ export interface Profile {
   reminder: string | null
 }
 
-export type Account = { kind: 'guest' } | { kind: 'google'; profile: Profile }
+export type Account = { kind: 'guest' } | { kind: 'google'; profile: Profile; /** Supabase auth user id. Absent for the demo account. */ userId?: string }
 
 export interface LastResult {
   result: GameResult

@@ -34,7 +34,8 @@ Each screen has a desktop layout and a phone layout (below 760px wide), matching
 
 There's no backend yet, so a few things are stand-ins:
 
-- **Google sign-in is fake.** "Continue with Google" or "Log in" signs you in as a demo player, Sam R., with a 12-day streak and some scores. Anything you did as a guest is kept when you sign in.
+- **Google sign-in is real once Supabase is set up.** Copy `.env.example` to `.env.local` and fill in the project URL and anon key. Without those two values the app falls back to the demo sign-in below, so nothing breaks for people who have not set it up. In Supabase, turn on Authentication > Providers > Google, and add `http://localhost:5173` (and the Vercel URL) under Authentication > URL Configuration > Redirect URLs. Game progress is still saved in `localStorage` (one entry per user); the game tables are not connected yet.
+- **Demo sign-in (no Supabase).** "Continue with Google" or "Log in" signs you in as a demo player, Sam R., with a 12-day streak and some scores. Anything you did as a guest is kept when you sign in.
 - **Saving.** Signed-in progress is stored in `localStorage`. Guest progress only lasts for the browser tab, matching "progress isn't saved until they sign in". To start over, clear the site's storage.
 - **Friends** on the leaderboard are made-up data in `src/data/mock.ts`.
 - **Memory and Numbers** don't have wireframes yet. Their screens are placeholders with a "Finish with a sample score" button so the rest of the flow can be tried.
