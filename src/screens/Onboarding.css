@@ -1,0 +1,197 @@
+.onboarding {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-height: calc(100dvh - var(--header-h) - 72px);
+  padding: 8px 20px;
+}
+
+.onboarding-progress {
+  display: flex;
+  gap: 8px;
+}
+
+.onboarding-progress span {
+  width: 80px;
+  height: 12px;
+  background: var(--grey-3);
+}
+
+.onboarding-progress span.done {
+  background: var(--red);
+}
+
+.onboarding-step {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.onboarding h1 {
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.onboarding-hint {
+  margin-top: -8px;
+  font-size: 20px;
+  color: var(--muted);
+}
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+
+.option {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 20px;
+  border: var(--rule-thin);
+  background: none;
+  font-size: 22px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.option:hover {
+  background: var(--grey-1);
+}
+
+.option[aria-checked='true'],
+.option[aria-pressed='true'] {
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+  font-weight: 700;
+}
+
+.option small {
+  font-size: 17px;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.plan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.plan-list li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px;
+  border: var(--rule-thin);
+  font-size: 20px;
+}
+
+.plan-list svg {
+  width: 54px;
+  height: 36px;
+  flex: none;
+}
+
+.plan-list b {
+  display: block;
+  font-size: 22px;
+}
+
+.plan-list .badge {
+  margin-left: auto;
+  font-size: 15px;
+}
+
+.plan-reminder {
+  font-size: 20px;
+}
+
+.plan-save {
+  max-width: 520px;
+}
+
+.plan-save b {
+  font-size: 22px;
+}
+
+.plan-save p {
+  font-size: 18px;
+  color: var(--muted);
+}
+
+.onboarding-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: auto;
+  padding-top: 12px;
+}
+
+@media (max-width: 760px) {
+  .onboarding {
+    gap: 14px;
+    min-height: calc(100dvh - var(--header-h) - 40px);
+    padding: 0;
+  }
+
+  .onboarding-progress {
+    gap: 6px;
+  }
+
+  .onboarding-progress span {
+    flex: 1;
+    width: auto;
+    height: 10px;
+  }
+
+  .onboarding-step {
+    display: none;
+  }
+
+  .onboarding h1 {
+    font-size: 28px;
+  }
+
+  .onboarding-hint,
+  .plan-reminder {
+    font-size: 17px;
+  }
+
+  .option {
+    padding: 11px 14px;
+    font-size: 18px;
+  }
+
+  .option small {
+    font-size: 14px;
+  }
+
+  .plan-list li {
+    gap: 12px;
+    padding: 8px 12px;
+    font-size: 16px;
+  }
+
+  .plan-list b {
+    font-size: 18px;
+  }
+
+  .onboarding-actions {
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .onboarding-actions .btn {
+    width: 100%;
+  }
+}

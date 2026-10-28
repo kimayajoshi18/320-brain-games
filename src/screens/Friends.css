@@ -1,0 +1,197 @@
+.friends {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 32px;
+}
+
+.friends-main {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.friends-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.friends-head h1 {
+  font-size: 32px;
+  font-weight: 800;
+}
+
+.segmented {
+  display: flex;
+  border: var(--rule-thin);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.segmented button {
+  padding: 8px 14px;
+  border: 0;
+  background: none;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+.segmented button[aria-pressed='true'] {
+  background: var(--ink);
+  color: #fff;
+}
+
+.leaderboard {
+  margin: 0;
+  padding: 0;
+  border: var(--rule-thin);
+  font-size: 22px;
+  list-style: none;
+}
+
+.leaderboard li {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+}
+
+.leaderboard li + li {
+  border-top: var(--rule-thin);
+}
+
+.leaderboard li.is-you {
+  border-top-color: var(--red);
+  background: var(--red);
+  color: #fff;
+  font-weight: 800;
+}
+
+.leaderboard li.is-you + li {
+  border-top-color: var(--red);
+}
+
+.leaderboard .rank {
+  width: 24px;
+  font-weight: 800;
+}
+
+.leaderboard .mini-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  background: var(--grey-2);
+  color: var(--faint);
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.leaderboard li.is-you .mini-avatar {
+  background: #fff;
+  color: var(--red);
+}
+
+.leaderboard .name {
+  flex: 1;
+}
+
+.leaderboard .score {
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.friends-note {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.invite {
+  align-self: start;
+}
+
+.invite b {
+  font-size: 22px;
+}
+
+.invite p {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.invite-mobile {
+  display: none;
+}
+
+.friends-signin {
+  max-width: 560px;
+  font-size: 18px;
+}
+
+.friends-signin b {
+  font-size: 24px;
+}
+
+@media (max-width: 760px) {
+  .friends {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: calc(100dvh - var(--header-h) - var(--tabbar-h) - 44px);
+  }
+
+  .friends-main {
+    gap: 12px;
+  }
+
+  .friends-head {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .friends-head h1 {
+    font-size: 26px;
+  }
+
+  .segmented {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    font-size: 15px;
+  }
+
+  .leaderboard {
+    font-size: 17px;
+  }
+
+  .leaderboard li {
+    gap: 10px;
+    padding: 10px 12px;
+  }
+
+  .leaderboard .rank {
+    width: auto;
+  }
+
+  .leaderboard .mini-avatar {
+    display: none;
+  }
+
+  .friends-note {
+    font-size: 15px;
+  }
+
+  .invite {
+    display: none;
+  }
+
+  .invite-mobile {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: auto;
+  }
+}
