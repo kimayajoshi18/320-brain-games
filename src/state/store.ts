@@ -71,7 +71,7 @@ export function completeOnboarding(state: AppState, answers: Omit<Onboarding, 'c
 
 export function updateProfile(state: AppState, changes: Partial<Profile>): AppState {
   if (state.account.kind !== 'google') return state
-  return { ...state, account: { kind: 'google', profile: { ...state.account.profile, ...changes } } }
+  return { ...state, account: { ...state.account, profile: { ...state.account.profile, ...changes } } }
 }
 
 /**

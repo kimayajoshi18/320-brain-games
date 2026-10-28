@@ -32,9 +32,13 @@ export default function Onboarding() {
   const toggleFocus = (id: GameId) =>
     setFocus((current) => (current.includes(id) ? current.filter((g) => g !== id) : [...current, id]))
 
-  const finish = (withGoogle: boolean) => {
+  const finish = async (withGoogle: boolean) => {
     actions.completeOnboarding({ focus, when })
-    if (withGoogle) actions.signIn()
+    if (withGoogle) {
+      // null means we are being sent to Google; the app picks up again when they return.
+      const result = await actions.signIn()
+      if (!result) return
+    }
     navigate('/home')
   }
 

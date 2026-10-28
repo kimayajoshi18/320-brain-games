@@ -9,12 +9,16 @@ export default function Landing() {
   const { state, actions } = useAppState()
   const navigate = useNavigate()
 
-  // Returning players skip straight to today's games.
+  // Signed-in players go to the survey if they have not done it, otherwise to today's games.
+  if (state.account.kind === 'google') {
+    return <Navigate to={state.onboarding.complete ? '/home' : '/onboarding'} replace />
+  }
+  // Returning guests skip straight to today's games.
   if (state.onboarding.complete) return <Navigate to="/home" replace />
 
-  const signIn = () => {
-    const { onboarded } = actions.signIn()
-    navigate(onboarded ? '/home' : '/onboarding')
+  const signIn = async () => {
+    const result = await actions.signIn()
+    if (result) navigate(result.onboarded ? '/home' : '/onboarding')
   }
 
   return (
