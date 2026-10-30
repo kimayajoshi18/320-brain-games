@@ -26,7 +26,7 @@ export default function Profile() {
   const navigate = useNavigate()
   const profile = state.account.kind === 'google' ? state.account.profile : null
 
-  const achievements = ACHIEVEMENTS.map((a) => ({ ...a, isEarned: a.earned(state) })).sort(
+  const achievements = ACHIEVEMENTS.map((a) => ({ ...a, isEarned: state.earned.includes(a.id) || a.earned(state) })).sort(
     (a, b) => Number(b.isEarned) - Number(a.isEarned),
   )
 
@@ -111,9 +111,24 @@ interface AccountSettingsProps {
 }
 
 function AccountSettings({ profile, onChange, onSignOut }: AccountSettingsProps) {
+  const [editingName, setEditingName] = useState(false)
+  const [name, setName] = useState(profile.name)
+  const [nameError, setNameError] = useState<string | null>(null)
   const [editingPhone, setEditingPhone] = useState(false)
   const [phone, setPhone] = useState(profile.recoveryPhone ?? '')
   const [phoneError, setPhoneError] = useState<string | null>(null)
+
+  const saveName = (event: FormEvent) => {
+    event.preventDefault()
+    const trimmed = name.trim()
+    if (trimmed.length < 1 || trimmed.length > 40) {
+      setNameError('Enter a name between 1 and 40 characters.')
+      return
+    }
+    if (trimmed !== profile.name) onChange({ name: trimmed })
+    setNameError(null)
+    setEditingName(false)
+  }
 
   const savePhone = (event: FormEvent) => {
     event.preventDefault()
@@ -130,6 +145,51 @@ function AccountSettings({ profile, onChange, onSignOut }: AccountSettingsProps)
   return (
     <>
       <span>Google login</span>
+
+      {editingName ? (
+        <form onSubmit={saveName} noValidate>
+          <label className="visually-hidden" htmlFor="display-name">
+            Display name
+          </label>
+          <input
+            id="display-name"
+            type="text"
+            autoComplete="name"
+            maxLength={40}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            aria-invalid={nameError !== null}
+            aria-describedby={nameError ? 'display-name-error' : undefined}
+            autoFocus
+          />
+          <button type="submit" className="btn btn-dark btn-sm">
+            Save
+          </button>
+          <button
+            type="button"
+            className="btn btn-outline btn-sm"
+            onClick={() => {
+              setName(profile.name)
+              setNameError(null)
+              setEditingName(false)
+            }}
+          >
+            Cancel
+          </button>
+          {nameError && (
+            <span id="display-name-error" className="error">
+              {nameError}
+            </span>
+          )}
+        </form>
+      ) : (
+        <span>
+          Name:{' '}
+          <button type="button" className="link-button" onClick={() => setEditingName(true)}>
+            {profile.name}
+          </button>
+        </span>
+      )}
 
       {editingPhone ? (
         <form onSubmit={savePhone} noValidate>

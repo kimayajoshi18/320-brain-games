@@ -8,8 +8,37 @@ export function toDayKey(date: Date): DayKey {
   return `${y}-${m}-${d}`
 }
 
+let timeZone: string | undefined
+let formatter: Intl.DateTimeFormat | undefined
+
+export function browserTimezone(): string {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone
+}
+
+export function isValidTimezone(tz: string): boolean {
+  try {
+    new Intl.DateTimeFormat('en-US', { timeZone: tz })
+    return true
+  } catch {
+    return false
+  }
+}
+
+/** Sets the time zone that decides which calendar day a moment falls on. Invalid or empty means the browser's. */
+export function setTimezone(tz: string | null | undefined) {
+  timeZone = tz && isValidTimezone(tz) ? tz : undefined
+  formatter = undefined
+}
+
+/** The calendar day an instant falls on in the player's time zone. */
+export function dayKeyOf(instant: Date): DayKey {
+  formatter ??= new Intl.DateTimeFormat('en-US', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' })
+  const part = (type: string) => formatter!.formatToParts(instant).find((p) => p.type === type)?.value ?? ''
+  return `${part('year')}-${part('month')}-${part('day')}`
+}
+
 export function todayKey(): DayKey {
-  return toDayKey(new Date())
+  return dayKeyOf(new Date())
 }
 
 export function fromDayKey(key: DayKey): Date {

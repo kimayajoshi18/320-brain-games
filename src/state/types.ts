@@ -19,6 +19,8 @@ export interface Onboarding {
   /** Games the player wants to work on; these go first in the daily three. */
   focus: GameId[]
   when: PlayTime | null
+  /** Answers to the other survey questions, by question id (see data/survey.ts). */
+  answers: Record<string, string>
 }
 
 export interface Profile {
@@ -51,4 +53,32 @@ export interface AppState {
   topScores: Record<GameId, GameResult[]>
   gamesPlayed: number
   lastResult: LastResult | null
+  /** Ids from data/achievements.ts that this signed-in player has earned. */
+  earned: string[]
+}
+
+/** One row of `game_sessions`, reduced to what the app needs. `playedAt` is the local calendar day. */
+export interface RemoteSession {
+  gameId: GameId
+  points: number
+  playedAt: DayKey
+}
+
+/** Everything loaded from Supabase for a signed-in player, ready to merge into the app state. */
+export interface RemoteSnapshot {
+  userId: string
+  /** Oldest first. */
+  sessions: RemoteSession[]
+  completedDays: DayKey[]
+  longestStreak: number
+  gamesPlayed: number
+}
+
+/** What the `profiles` row holds. `extras` is null when the optional columns do not exist yet. */
+export interface RemoteProfile {
+  displayName: string | null
+  ageRange: string | null
+  goals: GameId[]
+  playTime: PlayTime | null
+  extras: { survey: Record<string, string> | null; recoveryPhone: string | null; reminder: string | null } | null
 }

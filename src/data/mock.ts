@@ -39,7 +39,7 @@ export function createDemoAccount(today: DayKey): AppState {
       kind: 'google',
       profile: { name: 'Sam R.', recoveryPhone: null, reminder: '8:00am' },
     },
-    onboarding: { complete: true, focus: [], when: 'commute' },
+    onboarding: { complete: true, focus: [], when: 'commute', answers: {} },
     today,
     todayResults: { memory: todaysMemory },
     // A 12-day streak running up to yesterday.
@@ -52,6 +52,7 @@ export function createDemoAccount(today: DayKey): AppState {
     },
     gamesPlayed: 57,
     lastResult: null,
+    earned: [],
   }
 }
 

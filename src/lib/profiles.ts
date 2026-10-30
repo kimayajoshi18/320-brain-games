@@ -1,4 +1,5 @@
 import type { User } from '@supabase/supabase-js'
+import { browserTimezone } from './date.ts'
 import { supabase } from './supabase.ts'
 
 /** Best display name we can get from the Google account. */
@@ -18,6 +19,6 @@ export async function ensureProfile(user: User): Promise<void> {
   if (!supabase) return
   const { error } = await supabase
     .from('profiles')
-    .upsert({ id: user.id, display_name: displayNameFor(user) }, { onConflict: 'id', ignoreDuplicates: true })
+    .upsert({ id: user.id, display_name: displayNameFor(user), timezone: browserTimezone() }, { onConflict: 'id', ignoreDuplicates: true })
   if (error) console.warn('Could not create profile row:', error.message)
 }
