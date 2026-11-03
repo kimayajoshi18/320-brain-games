@@ -69,6 +69,11 @@ export function completeOnboarding(state: AppState, answers: Omit<Onboarding, 'c
   return answers.when ? updateProfile(next, { reminder: reminderFor(answers.when) }) : next
 }
 
+/** True when the survey was answered rather than skipped. */
+export function hasSurveyAnswers(onboarding: Onboarding): boolean {
+  return onboarding.complete && (onboarding.when !== null || onboarding.focus.length > 0)
+}
+
 export function updateProfile(state: AppState, changes: Partial<Profile>): AppState {
   if (state.account.kind !== 'google') return state
   return { ...state, account: { ...state.account, profile: { ...state.account.profile, ...changes } } }
@@ -83,7 +88,7 @@ export function mergeGuestIntoAccount(account: AppState, guest: AppState): AppSt
   // Survey answers the guest just gave are newer than whatever the account has.
   // A guest who skipped the survey doesn't overwrite anything.
   const answers = guest.onboarding
-  if (answers.complete && (answers.when !== null || answers.focus.length > 0)) {
+  if (hasSurveyAnswers(answers)) {
     merged = completeOnboarding(merged, { focus: answers.focus, when: answers.when })
   }
   for (const id of GAME_IDS) {
@@ -91,6 +96,19 @@ export function mergeGuestIntoAccount(account: AppState, guest: AppState): AppSt
     if (result) merged = recordResult(merged, result)
   }
   return { ...merged, lastResult: guest.lastResult ?? merged.lastResult }
+}
+
+/**
+ * Rebuilds a player's progress from every game they have played (as loaded from the server),
+ * by replaying them in order through the same rules as live play. Account, survey and the
+ * results screen are kept from `state`.
+ */
+export function rebuildFromResults(state: AppState, results: GameResult[], longestStreak = 0): AppState {
+  const ordered = [...results].sort((a, b) => (a.finishedAt ?? a.playedAt).localeCompare(b.finishedAt ?? b.playedAt))
+  let rebuilt: AppState = { ...createGuestState(state.today), account: state.account, onboarding: state.onboarding }
+  for (const result of ordered) rebuilt = recordResult(rollToDay(rebuilt, result.playedAt), result)
+  rebuilt = rollToDay(rebuilt, state.today)
+  return { ...rebuilt, bestStreak: Math.max(rebuilt.bestStreak, longestStreak), lastResult: state.lastResult }
 }
 
 // ---------- Selectors ----------

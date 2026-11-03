@@ -12,6 +12,10 @@ export interface GameResult {
   /** How this result reads in the high-score table, e.g. "1,240", "2:04" or "5/5". */
   highlight: string
   playedAt: DayKey
+  /** Unique id for this play, saved as game_sessions.client_session_id. Added when the result is recorded. */
+  id?: string
+  /** When the game finished (ISO time), saved as game_sessions.played_at. Added when the result is recorded. */
+  finishedAt?: string
 }
 
 export interface Onboarding {

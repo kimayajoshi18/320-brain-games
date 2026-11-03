@@ -1,16 +1,18 @@
 import type { User } from '@supabase/supabase-js'
-import { useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from 'react'
 import { createDemoAccount } from '../data/mock.ts'
 import { todayKey } from '../lib/date.ts'
-import { displayNameFor, ensureProfile } from '../lib/profiles.ts'
+import { displayNameFor, fetchProfile, saveOnboarding, saveProfile } from '../lib/profiles.ts'
+import { fetchProgress, flushPending, queueResults, stamp } from '../lib/sessions.ts'
 import { supabase } from '../lib/supabase.ts'
 import { AppStateContext, type AppActions } from './context.ts'
 import * as store from './store.ts'
-import type { AppState } from './types.ts'
+import type { AppState, GameResult, Onboarding, Profile } from './types.ts'
 
 // Sign-in is real Google auth through Supabase when VITE_SUPABASE_* is set; otherwise it is the
-// demo sign-in. Game progress is still kept in localStorage (one entry per Supabase user) until
-// the game tables are wired up. Guest progress only lives for the browser tab:
+// demo sign-in. With Supabase, the profile and survey answers live in the `profiles` table
+// (lib/profiles.ts) and every finished game in `game_sessions` (lib/sessions.ts); localStorage
+// keeps a per-user copy so the app opens instantly. Guest progress only lives for the browser tab:
 // "progress isn't saved until they sign in".
 const ACCOUNT_KEY = 'puzzlr:account'
 const SIGNED_IN_KEY = 'puzzlr:signed-in'
@@ -61,6 +63,8 @@ type Action =
   | { type: 'replace'; state: AppState }
   | { type: 'signIn'; account: AppState }
   | { type: 'authUser'; user: User }
+  | { type: 'profileLoaded'; userId: string; profile: Profile; onboarding: Onboarding | null }
+  | { type: 'progressLoaded'; userId: string; results: GameResult[]; longestStreak: number }
   | { type: 'completeOnboarding'; answers: Parameters<AppActions['completeOnboarding']>[0] }
   | { type: 'recordResult'; result: Parameters<AppActions['recordResult']>[0] }
   | { type: 'updateProfile'; changes: Parameters<AppActions['updateProfile']>[0] }
@@ -79,6 +83,16 @@ function reducer(state: AppState, action: Action): AppState {
       // A guest's progress is carried over; a different signed-in user is replaced outright.
       return state.account.kind === 'guest' ? store.mergeGuestIntoAccount(account, state) : account
     }
+    case 'profileLoaded':
+      if (state.account.kind !== 'google' || state.account.userId !== action.userId) return state
+      return {
+        ...state,
+        account: { ...state.account, profile: action.profile },
+        onboarding: action.onboarding ?? state.onboarding,
+      }
+    case 'progressLoaded':
+      if (state.account.kind !== 'google' || state.account.userId !== action.userId) return state
+      return store.rebuildFromResults(state, action.results, action.longestStreak)
     case 'completeOnboarding':
       return store.completeOnboarding(state, action.answers)
     case 'recordResult':
@@ -88,11 +102,52 @@ function reducer(state: AppState, action: Action): AppState {
   }
 }
 
+/** The Supabase user whose `profiles` row should be kept in step with this state, if any. */
+function remoteUserId(state: AppState): string | undefined {
+  return supabase && state.account.kind === 'google' ? state.account.userId : undefined
+}
+
+interface GuestProgress {
+  answers: Onboarding | null
+  results: GameResult[]
+}
+
+/**
+ * Brings in the player's saved profile and games once Supabase says who they are. Survey answers
+ * given as a guest just before signing in are newer than the account's, so they are saved over it,
+ * and the guest's games are uploaded to the account.
+ */
+async function loadAccount(user: User, guest: GuestProgress, dispatch: Dispatch<Action>) {
+  const remote = await fetchProfile(user.id)
+  if (remote) {
+    let { profile, onboarding } = remote
+    if (guest.answers) {
+      const reminder = guest.answers.when ? store.reminderFor(guest.answers.when) : profile.reminder
+      profile = { ...profile, reminder }
+      onboarding = guest.answers
+      await saveOnboarding(user.id, guest.answers, reminder)
+    }
+    dispatch({ type: 'profileLoaded', userId: user.id, profile, onboarding })
+  }
+
+  if (guest.results.length) queueResults(user.id, guest.results)
+  const unsaved = await flushPending(user.id)
+  const saved = await fetchProgress(user.id)
+  if (saved) {
+    // Games that couldn't be uploaded yet still count on this device.
+    const savedIds = new Set(saved.results.map((r) => r.id))
+    const results = [...saved.results, ...unsaved.filter((r) => !savedIds.has(r.id))]
+    dispatch({ type: 'progressLoaded', userId: user.id, results, longestStreak: saved.longestStreak })
+  }
+}
+
 export default function AppStateProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, undefined, loadInitialState)
   const latest = useRef(state)
-  // With Supabase we must wait to hear whether a session exists before showing any screen.
+  // With Supabase we must wait to hear whether a session exists (and load its profile) before
+  // showing any screen, or a returning player would be sent to onboarding.
   const [authReady, setAuthReady] = useState(!supabase)
+  const profileLoadedFor = useRef<string | null>(null)
 
   // Persist after every change.
   useEffect(() => {
@@ -110,14 +165,26 @@ export default function AppStateProvider({ children }: { children: ReactNode }) 
     if (!supabase) return
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
       // Keep this callback synchronous; Supabase can deadlock if it awaits other auth calls in here.
-      if (session?.user) {
-        dispatch({ type: 'authUser', user: session.user })
+      const user = session?.user
+      if (user) {
+        const before = latest.current
+        dispatch({ type: 'authUser', user })
         sessionStorage.removeItem(GUEST_KEY) // The guest's progress is now part of the account.
-        if (event === 'SIGNED_IN') setTimeout(() => void ensureProfile(session.user), 0)
-      } else if (event === 'SIGNED_OUT') {
-        dispatch({ type: 'replace', state: store.createGuestState(todayKey()) })
+        // Token refreshes also land here; only load the profile once per user.
+        if (profileLoadedFor.current !== user.id) {
+          profileLoadedFor.current = user.id
+          const wasGuest = before.account.kind === 'guest'
+          const guest: GuestProgress = {
+            answers: wasGuest && store.hasSurveyAnswers(before.onboarding) ? before.onboarding : null,
+            results: wasGuest ? Object.values(before.todayResults) : [],
+          }
+          setTimeout(() => void loadAccount(user, guest, dispatch).finally(() => setAuthReady(true)), 0)
+        }
+      } else {
+        profileLoadedFor.current = null
+        if (event === 'SIGNED_OUT') dispatch({ type: 'replace', state: store.createGuestState(todayKey()) })
+        if (event === 'INITIAL_SESSION') setAuthReady(true)
       }
-      if (event === 'INITIAL_SESSION') setAuthReady(true)
     })
     return () => data.subscription.unsubscribe()
   }, [])
@@ -133,9 +200,25 @@ export default function AppStateProvider({ children }: { children: ReactNode }) 
 
   const actions = useMemo<AppActions>(
     () => ({
-      completeOnboarding: (answers) => dispatch({ type: 'completeOnboarding', answers }),
-      recordResult: (result) => dispatch({ type: 'recordResult', result }),
-      updateProfile: (changes) => dispatch({ type: 'updateProfile', changes }),
+      completeOnboarding: (answers) => {
+        dispatch({ type: 'completeOnboarding', answers })
+        const userId = remoteUserId(latest.current)
+        if (userId) void saveOnboarding(userId, answers, answers.when ? store.reminderFor(answers.when) : undefined)
+      },
+      recordResult: (result) => {
+        const recorded = stamp(result)
+        dispatch({ type: 'recordResult', result: recorded })
+        const userId = remoteUserId(latest.current)
+        if (userId) {
+          queueResults(userId, [recorded])
+          void flushPending(userId)
+        }
+      },
+      updateProfile: (changes) => {
+        dispatch({ type: 'updateProfile', changes })
+        const userId = remoteUserId(latest.current)
+        if (userId) void saveProfile(userId, changes)
+      },
       signIn: async () => {
         if (supabase) {
           // Let the pending guest state (e.g. onboarding answers) reach sessionStorage before we leave the page.
