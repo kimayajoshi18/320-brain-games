@@ -13,6 +13,14 @@ export interface Shape {
   color: string
 }
 
+/** A rectangle in scene units. */
+export interface Area {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
 export interface Puzzle {
   width: number
   height: number
@@ -21,6 +29,8 @@ export interface Puzzle {
   shapes: Shape[]
   /** Shape id -> the different color it has in scene B. */
   differences: Map<number, string>
+  /** Difference id -> the area a hint highlights. It holds the whole shape, but not in the middle. */
+  hintAreas: Map<number, Area>
 }
 
 export const DIFFERENCE_COUNT = 5
@@ -63,7 +73,26 @@ export function createPuzzle(seed: string): Puzzle {
     differences.set(shape.id, rand.pick(PALETTE.filter((c) => c !== shape.color)))
   }
 
-  return { width, height, background: '#f4f1ea', shapes, differences }
+  // A hint shows roughly where a difference is: a quarter-size box placed at random around it.
+  const hintAreas = new Map<number, Area>()
+  for (const id of differences.keys()) {
+    const s = shapes[id]
+    const boxW = width / 2
+    const boxH = height / 2
+    hintAreas.set(id, {
+      x: between(rand.next(), Math.max(0, s.x + s.r - boxW), Math.min(width - boxW, s.x - s.r)),
+      y: between(rand.next(), Math.max(0, s.y + s.r - boxH), Math.min(height - boxH, s.y - s.r)),
+      width: boxW,
+      height: boxH,
+    })
+  }
+
+  return { width, height, background: '#f4f1ea', shapes, differences, hintAreas }
+}
+
+/** Maps t in [0, 1) onto [min, max]. */
+function between(t: number, min: number, max: number): number {
+  return min + t * (max - min)
 }
 
 export function shapesForScene(puzzle: Puzzle, scene: 'a' | 'b'): Shape[] {
