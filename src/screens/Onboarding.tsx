@@ -1,39 +1,47 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import AppShell from '../components/AppShell.tsx'
 import GameArt from '../components/GameArt.tsx'
 import { GAMES, GAME_IDS, type GameId } from '../data/games.ts'
+import { SURVEY, firstPicked, type SurveyAnswers } from '../data/survey.ts'
 import { useAppState } from '../state/context.ts'
 import { dailyOrder, reminderFor } from '../state/store.ts'
 import type { PlayTime } from '../state/types.ts'
 import './Onboarding.css'
 
-const PLAY_TIMES: { id: PlayTime; label: string; short: string }[] = [
-  { id: 'commute', label: 'On my commute (offline)', short: 'On my commute' },
-  { id: 'morning', label: 'Morning', short: 'Morning' },
-  { id: 'evening', label: 'Evening', short: 'Evening' },
-  { id: 'whenever', label: 'Whenever I remember', short: 'Whenever' },
-]
-
-const STEP_COUNT = 3
+const STEP_COUNT = SURVEY.length + 1
 
 export default function Onboarding() {
   const { state, actions } = useAppState()
   const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [focus, setFocus] = useState<GameId[]>(state.onboarding.focus)
-  const [when, setWhen] = useState<PlayTime | null>(state.onboarding.when)
+  const [answers, setAnswers] = useState<SurveyAnswers>(state.onboarding.answers ?? {})
+  // Opened from the profile page to change the saved answers.
+  const redo = useSearchParams()[0].has('redo')
 
   const signedIn = state.account.kind === 'google'
+  const whenQuestion = SURVEY.find((q) => q.id === 'when')
+  const when = (whenQuestion ? firstPicked(whenQuestion, answers) : null) as PlayTime | null
   const reminder = when ? reminderFor(when) : null
-  const plan = dailyOrder({ ...state, onboarding: { complete: true, focus, when } })
-  const canContinue = step === 0 ? focus.length > 0 : step === 1 ? when !== null : true
+  const plan = dailyOrder({ ...state, onboarding: { complete: true, focus, when, answers } })
+  const question = SURVEY[step]
+  const optional = question?.optional === true
+  const answered = !question || (question.kind === 'games' ? focus.length > 0 : (answers[question.id]?.length ?? 0) > 0)
+  const canContinue = answered || optional
+
+  const pick = (id: string, option: string, multiple: boolean) =>
+    setAnswers((current) => {
+      const now = current[id] ?? []
+      const next = !multiple ? [option] : now.includes(option) ? now.filter((o) => o !== option) : [...now, option]
+      return { ...current, [id]: next }
+    })
 
   const toggleFocus = (id: GameId) =>
     setFocus((current) => (current.includes(id) ? current.filter((g) => g !== id) : [...current, id]))
 
   const finish = async (withGoogle: boolean) => {
-    actions.completeOnboarding({ focus, when })
+    actions.completeOnboarding({ focus, when, answers })
     if (withGoogle) {
       // null means we are being sent to Google; the app picks up again when they return.
       const result = await actions.signIn()
@@ -43,7 +51,11 @@ export default function Onboarding() {
   }
 
   const skip = () => {
-    actions.completeOnboarding({ focus: [], when: null })
+    if (redo) {
+      navigate('/profile')
+      return
+    }
+    actions.completeOnboarding({ focus: [], when: null, answers: {} })
     navigate('/home')
   }
 
@@ -65,11 +77,11 @@ export default function Onboarding() {
           Step {step + 1} of {STEP_COUNT}
         </p>
 
-        {step === 0 && (
+        {question?.kind === 'games' && (
           <>
-            <h1 id="q-focus">What do you want to train?</h1>
-            <p className="onboarding-hint">Pick any. We'll put these first in your daily three.</p>
-            <div className="option-list" role="group" aria-labelledby="q-focus">
+            <h1 id={`q-${question.id}`}>{question.title}</h1>
+            {question.hint && <p className="onboarding-hint">{question.hint}</p>}
+            <div className="option-list" role="group" aria-labelledby={`q-${question.id}`}>
               {GAME_IDS.map((id) => (
                 <button
                   key={id}
@@ -86,28 +98,43 @@ export default function Onboarding() {
           </>
         )}
 
-        {step === 1 && (
+        {question?.kind === 'choice' && (
           <>
-            <h1 id="q-when">When do you usually play?</h1>
-            <div className="option-list" role="radiogroup" aria-labelledby="q-when">
-              {PLAY_TIMES.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  role="radio"
-                  className="option"
-                  aria-checked={when === t.id}
-                  onClick={() => setWhen(t.id)}
-                >
-                  <span className="desktop-only">{t.label}</span>
-                  <span className="mobile-only">{t.short}</span>
-                </button>
-              ))}
+            <h1 id={`q-${question.id}`}>{question.title}</h1>
+            {question.hint && <p className="onboarding-hint">{question.hint}</p>}
+            <div
+              className="option-list"
+              role={question.multiple ? 'group' : 'radiogroup'}
+              aria-labelledby={`q-${question.id}`}
+            >
+              {question.options.map((o) => {
+                const selected = answers[question.id]?.includes(o.id) ?? false
+                return (
+                  <button
+                    key={o.id}
+                    type="button"
+                    role={question.multiple ? undefined : 'radio'}
+                    className="option"
+                    aria-pressed={question.multiple ? selected : undefined}
+                    aria-checked={question.multiple ? undefined : selected}
+                    onClick={() => pick(question.id, o.id, question.multiple === true)}
+                  >
+                    {o.short ? (
+                      <>
+                        <span className="desktop-only">{o.label}</span>
+                        <span className="mobile-only">{o.short}</span>
+                      </>
+                    ) : (
+                      o.label
+                    )}
+                  </button>
+                )
+              })}
             </div>
           </>
         )}
 
-        {step === 2 && (
+        {step === SURVEY.length && (
           <>
             <h1>Your plan</h1>
             <p className="onboarding-hint">Three games a day, about 6 minutes. Finish all three to add a day to your streak.</p>
@@ -144,7 +171,7 @@ export default function Onboarding() {
           )}
           {step < STEP_COUNT - 1 && (
             <button type="button" className="btn btn-dark" disabled={!canContinue} onClick={() => setStep(step + 1)}>
-              Next
+              {optional && !answered ? 'Skip' : 'Next'}
             </button>
           )}
           {step === STEP_COUNT - 1 && signedIn && (

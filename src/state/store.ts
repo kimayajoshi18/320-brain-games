@@ -1,4 +1,5 @@
 import { GAME_IDS, type GameId } from '../data/games.ts'
+import { struggleScore } from '../data/survey.ts'
 import { addDays, weekdayIndex, type DayKey } from '../lib/date.ts'
 import type { AppState, GameResult, Onboarding, PlayTime, Profile } from './types.ts'
 
@@ -17,7 +18,7 @@ export function reminderFor(when: PlayTime): string | null {
 export function createGuestState(today: DayKey): AppState {
   return {
     account: { kind: 'guest' },
-    onboarding: { complete: false, focus: [], when: null },
+    onboarding: { complete: false, focus: [], when: null, answers: {} },
     today,
     todayResults: {},
     completedDays: [],
@@ -71,7 +72,10 @@ export function completeOnboarding(state: AppState, answers: Omit<Onboarding, 'c
 
 /** True when the survey was answered rather than skipped. */
 export function hasSurveyAnswers(onboarding: Onboarding): boolean {
-  return onboarding.complete && (onboarding.when !== null || onboarding.focus.length > 0)
+  return (
+    onboarding.complete &&
+    (onboarding.when !== null || onboarding.focus.length > 0 || Object.keys(onboarding.answers ?? {}).length > 0)
+  )
 }
 
 export function updateProfile(state: AppState, changes: Partial<Profile>): AppState {
@@ -89,7 +93,7 @@ export function mergeGuestIntoAccount(account: AppState, guest: AppState): AppSt
   // A guest who skipped the survey doesn't overwrite anything.
   const answers = guest.onboarding
   if (hasSurveyAnswers(answers)) {
-    merged = completeOnboarding(merged, { focus: answers.focus, when: answers.when })
+    merged = completeOnboarding(merged, { focus: answers.focus, when: answers.when, answers: answers.answers })
   }
   for (const id of GAME_IDS) {
     const result = guest.todayResults[id]
@@ -127,10 +131,12 @@ export function currentStreak(state: AppState): number {
   return streakEndingAt(state.completedDays, end)
 }
 
-/** Today's three in play order: the player's focus areas first, then the rest. */
+/** Today's three in play order: the focus areas first, then the rest, most struggled-with first (ties keep the default order). */
 export function dailyOrder(state: AppState): GameId[] {
   const focus = GAME_IDS.filter((id) => state.onboarding.focus.includes(id))
-  return [...focus, ...GAME_IDS.filter((id) => !focus.includes(id))]
+  const answers = state.onboarding.answers ?? {}
+  const rest = GAME_IDS.filter((id) => !focus.includes(id))
+  return [...focus, ...rest.sort((a, b) => struggleScore(answers, b) - struggleScore(answers, a))]
 }
 
 export function nextDailyGame(state: AppState): GameId | null {

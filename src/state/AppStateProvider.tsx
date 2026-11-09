@@ -46,7 +46,7 @@ function accountForUser(user: User, today: string): AppState {
   if (saved) return saved
   return {
     ...store.createGuestState(today),
-    account: { kind: 'google', userId: user.id, profile: { name: displayNameFor(user), recoveryPhone: null, reminder: null } },
+    account: { kind: 'google', userId: user.id, profile: { name: displayNameFor(user), reminder: null } },
   }
 }
 
