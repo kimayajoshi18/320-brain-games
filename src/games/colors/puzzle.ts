@@ -86,7 +86,14 @@ export function differenceAt(puzzle: Puzzle, x: number, y: number, found: number
   return best?.id ?? null
 }
 
-/** 150 points per difference plus a bonus for finishing under 90 seconds. */
-export function scoreFor(totalSeconds: number): number {
-  return DIFFERENCE_COUNT * 150 + Math.max(0, Math.round((90 - totalSeconds) * 6))
+export const WRONG_TAP_POINTS = 50
+export const HINT_POINTS = 100
+
+/**
+ * 150 points per difference plus a bonus for finishing under 90 seconds, minus points for
+ * every wrong tap and hint, so mistakes cost something however long the round took. Never below 0.
+ */
+export function scoreFor({ seconds, wrongTaps, hints }: { seconds: number; wrongTaps: number; hints: number }): number {
+  const timeBonus = Math.max(0, Math.round((90 - seconds) * 6))
+  return Math.max(0, DIFFERENCE_COUNT * 150 + timeBonus - wrongTaps * WRONG_TAP_POINTS - hints * HINT_POINTS)
 }

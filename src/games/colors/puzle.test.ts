@@ -18,9 +18,19 @@ describe('differenceAt', ()=>{
 })
 
 describe('scoreFor', ()=>{
-    it('gives the time bonus under 90 seconds and never goes under the base', ()=>{
-        expect(scoreFor(60)).toBe(930)
-        expect(scoreFor(90)).toBe(750)
-        expect(scoreFor(300)).toBe(750)
+    it('gives the time bonus under 90 seconds and no bonus after that', ()=>{
+        expect(scoreFor({seconds: 60, wrongTaps: 0, hints: 0})).toBe(930)
+        expect(scoreFor({seconds: 90, wrongTaps: 0, hints: 0})).toBe(750)
+        expect(scoreFor({seconds: 300, wrongTaps: 0, hints: 0})).toBe(750)
+    })
+
+    it('takes off points for wrong taps and hints, even after 90 seconds', ()=>{
+        expect(scoreFor({seconds: 60, wrongTaps: 1, hints: 0})).toBe(880)
+        expect(scoreFor({seconds: 60, wrongTaps: 0, hints: 1})).toBe(830)
+        expect(scoreFor({seconds: 300, wrongTaps: 2, hints: 1})).toBe(550)
+    })
+
+    it('never goes below 0', ()=>{
+        expect(scoreFor({seconds: 300, wrongTaps: 20, hints: 5})).toBe(0)
     })
 })

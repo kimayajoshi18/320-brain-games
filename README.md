@@ -42,7 +42,7 @@ There's no backend yet, so a few things are stand-ins:
 - **"Why this helps"** text on the results screen still needs real sources.
 - **Not built yet:** working offline, sending reminders, and sending invites to contacts.
 
-Spot The Difference is fully playable. Wrong taps add 3 seconds, hints add 5, and you can't fail. Everyone gets the same puzzle each day; practice rounds get a new one.
+Spot The Difference is fully playable. Wrong taps cost 50 points and hints cost 100 (the score never goes below 0), and you can't fail. Everyone gets the same puzzle each day; practice rounds get a new one.
 
 ## Layout of `src/`
 

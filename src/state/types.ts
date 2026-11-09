@@ -13,7 +13,7 @@ export interface GameResult {
   /** How this result reads in the high-score table, e.g. "1,240", "2:04" or "5/5". */
   highlight: string
   playedAt: DayKey
-  /** Hints used and the seconds they added to the time. The points already include the penalty. */
+  /** Hints used and the points they cost. The points already include the penalty. */
   hintsUsed?: number
   hintPenalty?: number
   /** Unique id for this play, saved as game_sessions.client_session_id. Added when the result is recorded. */
