@@ -51,7 +51,7 @@
 }
 
 .results-streak strong {
-  color: var(--red);
+  color: var(--red-text);
   font-size: 40px;
   font-weight: 900;
   line-height: 1;
@@ -94,7 +94,7 @@
 }
 
 .results-side li.is-current {
-  color: var(--red);
+  color: var(--red-text);
   font-weight: 800;
 }
 

@@ -1,6 +1,27 @@
 import type { MouseEvent } from 'react'
 import type { Puzzle, Shape } from './puzzle.ts'
 
+/**
+ * Puzzle colors are fixed hex values; draw each through a CSS variable so the
+ * scene can switch to a dark palette (see the --scene-* tokens in global.css).
+ */
+const SCENE_COLOR_VARS: Record<string, string> = {
+  '#f4f1ea': '--scene-bg',
+  '#881c1c': '--scene-red',
+  '#d9a62e': '--scene-yellow',
+  '#2f6d8c': '--scene-blue',
+  '#3f8f5a': '--scene-green',
+  '#e07a5f': '--scene-coral',
+  '#6c4f9e': '--scene-purple',
+  '#111111': '--scene-ink',
+  '#8fb8c9': '--scene-sky',
+}
+
+const paint = (color: string) => {
+  const variable = SCENE_COLOR_VARS[color.toLowerCase()]
+  return variable ? `var(${variable}, ${color})` : color
+}
+
 export interface Miss {
   key: number
   x: number
@@ -39,7 +60,7 @@ export default function Scene({ label, scene, puzzle, shapes, found, hinted, mis
       aria-label={label}
       onClick={handleClick}
     >
-      <rect width={puzzle.width} height={puzzle.height} fill={puzzle.background} />
+      <rect width={puzzle.width} height={puzzle.height} fill={paint(puzzle.background)} />
       {shapes.map((s) => (
         <ShapeMark key={s.id} shape={s} />
       ))}
@@ -80,14 +101,14 @@ function ShapeMark({ shape: s }: { shape: Shape }) {
   const transform = `rotate(${s.rotation} ${s.x} ${s.y})`
   switch (s.kind) {
     case 'circle':
-      return <circle cx={s.x} cy={s.y} r={s.r} fill={s.color} />
+      return <circle cx={s.x} cy={s.y} r={s.r} fill={paint(s.color)} />
     case 'square':
-      return <rect x={s.x - s.r} y={s.y - s.r} width={s.r * 2} height={s.r * 2} fill={s.color} transform={transform} />
+      return <rect x={s.x - s.r} y={s.y - s.r} width={s.r * 2} height={s.r * 2} fill={paint(s.color)} transform={transform} />
     case 'triangle':
       return (
         <polygon
           points={`${s.x},${s.y - s.r} ${s.x + s.r},${s.y + s.r * 0.8} ${s.x - s.r},${s.y + s.r * 0.8}`}
-          fill={s.color}
+          fill={paint(s.color)}
           transform={transform}
         />
       )
@@ -95,7 +116,7 @@ function ShapeMark({ shape: s }: { shape: Shape }) {
       return (
         <polygon
           points={`${s.x},${s.y - s.r} ${s.x + s.r},${s.y} ${s.x},${s.y + s.r} ${s.x - s.r},${s.y}`}
-          fill={s.color}
+          fill={paint(s.color)}
           transform={transform}
         />
       )

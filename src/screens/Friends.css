@@ -40,7 +40,7 @@
 
 .segmented button[aria-pressed='true'] {
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
 }
 
 .leaderboard {
@@ -65,7 +65,7 @@
 .leaderboard li.is-you {
   border-top-color: var(--red);
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
   font-weight: 800;
 }
 
@@ -92,7 +92,7 @@
 }
 
 .leaderboard li.is-you .mini-avatar {
-  background: #fff;
+  background: var(--on-red);
   color: var(--red);
 }
 

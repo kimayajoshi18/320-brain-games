@@ -112,12 +112,12 @@
 }
 
 .is-locked .path-label {
-  color: #888;
+  color: var(--grey-5);
 }
 
 .is-done .path-node {
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
 }
 
 .is-done .path-node::before {
@@ -130,7 +130,7 @@
 .is-today .path-node {
   border: 6px solid var(--red);
   background: var(--paper);
-  color: var(--red);
+  color: var(--red-text);
 }
 
 .is-today .path-node::before {
@@ -159,7 +159,7 @@ a.path-item:hover .path-label {
   content: '';
   width: calc(var(--node) * 0.42);
   height: calc(var(--node) * 0.42);
-  background: #ccc;
+  background: var(--grey-6);
 }
 
 .is-reward.is-done .path-node,

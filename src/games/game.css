@@ -23,7 +23,7 @@
 }
 
 .game-penalty {
-  color: var(--red);
+  color: var(--red-text);
   font-weight: 800;
   animation: penalty-fade 0.9s ease-out forwards;
 }
