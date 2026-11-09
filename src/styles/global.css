@@ -3,9 +3,19 @@
  * "Puzzlr Wireframes" design: Archivo, heavy black rules, one accent color.
  */
 :root {
+  color-scheme: light;
+
+  /* Accent used as a fill (buttons, badges, bars) and the text/icons drawn on it. */
   --red: #881c1c;
   --red-dark: #5e1313;
+  --on-red: #fff;
+  /* Accent used as text or an outline on the page background. */
+  --red-text: #881c1c;
+  --red-text-hover: #5e1313;
   --ink: #111;
+  --ink-hover: #333;
+  /* Text on an ink-filled surface (dark buttons, dark panels, active tabs). */
+  --on-ink: #fff;
   --paper: #fff;
   --muted: #444;
   --faint: #666;
@@ -13,6 +23,20 @@
   --grey-2: #e6e6e6;
   --grey-3: #ddd;
   --grey-4: #999;
+  --grey-5: #888;
+  --grey-6: #ccc;
+  --placeholder-text: #555;
+
+  /* Spot the Difference scenes: the background and the eight shape colors. */
+  --scene-bg: #f4f1ea;
+  --scene-red: #881c1c;
+  --scene-yellow: #d9a62e;
+  --scene-blue: #2f6d8c;
+  --scene-green: #3f8f5a;
+  --scene-coral: #e07a5f;
+  --scene-purple: #6c4f9e;
+  --scene-ink: #111111;
+  --scene-sky: #8fb8c9;
 
   --rule: 4px solid var(--ink);
   --rule-thin: 3px solid var(--ink);
@@ -30,6 +54,44 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * Dark mode: the same design inverted. Ink and paper swap, greys step up from
+ * the background instead of down, and the accent is lifted so it stays readable
+ * on near-black.
+ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --red: #c23b3b;
+  --red-dark: #9e2a2a;
+  --on-red: #fff;
+  --red-text: #f07a7a;
+  --red-text-hover: #f5a3a3;
+  --ink: #ececec;
+  --ink-hover: #c4c4c4;
+  --on-ink: #121212;
+  --paper: #121212;
+  --muted: #b3b3b3;
+  --faint: #9a9a9a;
+  --grey-1: #1e1e1e;
+  --grey-2: #292929;
+  --grey-3: #3a3a3a;
+  --grey-4: #6e6e6e;
+  --grey-5: #8a8a8a;
+  --grey-6: #4a4a4a;
+  --placeholder-text: #a6a6a6;
+
+  --scene-bg: #262420;
+  --scene-red: #d64545;
+  --scene-yellow: #e0b040;
+  --scene-blue: #2f76a3;
+  --scene-green: #4fa86c;
+  --scene-coral: #f4a08a;
+  --scene-purple: #9b7fd4;
+  --scene-ink: #f2efe8;
+  --scene-sky: #8ccbe8;
 }
 
 *,
@@ -52,11 +114,11 @@ p {
 }
 
 a {
-  color: var(--red);
+  color: var(--red-text);
 }
 
 a:hover {
-  color: var(--red-dark);
+  color: var(--red-text-hover);
 }
 
 button {
@@ -65,7 +127,7 @@ button {
 }
 
 :focus-visible {
-  outline: 3px solid var(--red);
+  outline: 3px solid var(--red-text);
   outline-offset: 3px;
 }
 
@@ -109,25 +171,25 @@ button {
 .btn-primary {
   background: var(--red);
   border-color: var(--red);
-  color: #fff;
+  color: var(--on-red);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--red-dark);
   border-color: var(--red-dark);
-  color: #fff;
+  color: var(--on-red);
 }
 
 .btn-dark {
   background: var(--ink);
   border-color: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
 }
 
 .btn-dark:hover:not(:disabled) {
-  background: #333;
-  border-color: #333;
-  color: #fff;
+  background: var(--ink-hover);
+  border-color: var(--ink-hover);
+  color: var(--on-ink);
 }
 
 .btn-outline {
@@ -173,7 +235,7 @@ button {
   display: inline-block;
   padding: 6px 12px;
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
   font-size: 18px;
   font-weight: 800;
   line-height: 1.15;
@@ -212,7 +274,7 @@ button.chip:hover {
 .panel-dark {
   border-color: var(--ink);
   background: var(--ink);
-  color: #fff;
+  color: var(--on-ink);
 }
 
 .eyebrow {
@@ -232,7 +294,7 @@ button.chip:hover {
   align-items: center;
   justify-content: center;
   background: var(--grey-2);
-  color: #555;
+  color: var(--placeholder-text);
   font: 16px var(--mono);
 }
 

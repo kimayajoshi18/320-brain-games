@@ -21,6 +21,32 @@
   background: var(--red);
 }
 
+/* ---------- Theme toggle ---------- */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  padding: 0;
+  border: var(--rule-thin);
+  border-radius: 0;
+  background: none;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.theme-toggle:hover {
+  background: var(--grey-1);
+}
+
+.theme-toggle svg {
+  width: 20px;
+  height: 20px;
+}
+
 /* ---------- App shell ---------- */
 
 .app-shell {
@@ -46,6 +72,7 @@
 .app-header-right {
   display: flex;
   align-items: center;
+  gap: 16px;
   font-size: 20px;
   font-weight: 600;
 }
@@ -113,7 +140,18 @@
   }
 
   .app-header-right {
+    gap: 12px;
     font-size: 17px;
+  }
+
+  .theme-toggle {
+    width: 36px;
+    height: 36px;
+  }
+
+  .theme-toggle svg {
+    width: 18px;
+    height: 18px;
   }
 
   .app-nav {
@@ -154,7 +192,7 @@
 
   .tab-bar a.active {
     background: var(--ink);
-    color: #fff;
+    color: var(--on-ink);
     font-weight: 800;
   }
 }
@@ -202,6 +240,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+.task-header-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
 .task-header-title {
   font-size: inherit;
   font-weight: 800;
@@ -234,6 +278,10 @@
   .task-header {
     padding: 0 18px;
     font-size: 17px;
+  }
+
+  .task-header-right {
+    gap: 12px;
   }
 
   .task-header .long {

@@ -55,7 +55,7 @@
 }
 
 .account .link-button {
-  color: var(--red);
+  color: var(--red-text);
   text-decoration: underline;
 }
 
@@ -72,6 +72,7 @@
   border: var(--rule-thin);
   border-radius: 0;
   background: var(--paper);
+  color: var(--ink);
   font: inherit;
 }
 
@@ -81,7 +82,7 @@
 
 .account .error {
   width: 100%;
-  color: var(--red);
+  color: var(--red-text);
   font-size: 15px;
 }
 
@@ -123,7 +124,7 @@
   justify-content: center;
   height: 80px;
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
   font-size: 30px;
   font-weight: 900;
 }

@@ -60,7 +60,7 @@ function NumbersArt() {
             fontSize="14"
             fontWeight="800"
             fontFamily="var(--font)"
-            fill={i === 4 ? 'var(--paper)' : 'var(--ink)'}
+            fill={i === 4 ? 'var(--on-red)' : 'var(--ink)'}
           >
             {d}
           </text>

@@ -67,7 +67,7 @@
 .option[aria-pressed='true'] {
   border-color: var(--red);
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
   font-weight: 700;
 }
 

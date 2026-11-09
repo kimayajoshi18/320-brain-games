@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { NavLink } from 'react-router'
 import Brand from './Brand.tsx'
 import { NAV_ITEMS } from './nav.ts'
+import ThemeToggle from './ThemeToggle.tsx'
 import './layout.css'
 
 interface AppShellProps {
@@ -48,6 +49,7 @@ export default function AppShell({
           ) : (
             right
           )}
+          <ThemeToggle />
         </div>
       </header>
 

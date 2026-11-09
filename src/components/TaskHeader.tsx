@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import ThemeToggle from './ThemeToggle.tsx'
 import './layout.css'
 
 interface TaskHeaderProps {
@@ -16,7 +17,10 @@ export default function TaskHeader({ left, title, right }: TaskHeaderProps) {
     <header className="task-header">
       {left}
       <h1 className="task-header-title">{title}</h1>
-      <span>{right}</span>
+      <div className="task-header-right">
+        {right}
+        <ThemeToggle />
+      </div>
     </header>
   )
 }
