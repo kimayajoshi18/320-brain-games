@@ -21,6 +21,8 @@ interface SessionRow {
   score: number
   played_at: string
   duration_sec: number | null
+  hints_used: number
+  hint_penalty: number
   details: { stats?: string[]; highlight?: string } | null
 }
 
@@ -90,6 +92,8 @@ export async function flushPending(userId: string): Promise<GameResult[]> {
       score: Math.max(0, Math.round(r.points)),
       played_at: r.finishedAt!,
       duration_sec: Math.max(0, Math.round(r.durationSec)),
+      hints_used: Math.max(0, Math.round(r.hintsUsed ?? 0)),
+      hint_penalty: Math.max(0, Math.round(r.hintPenalty ?? 0)),
       details: { stats: r.stats, highlight: r.highlight },
     }))
     const { error } = await supabase
@@ -124,7 +128,7 @@ export async function fetchProgress(userId: string): Promise<SavedProgress | nul
     for (let from = 0; ; from += PAGE_SIZE) {
       const { data, error } = await supabase
         .from('game_sessions')
-        .select('client_session_id, game_id, score, played_at, duration_sec, details')
+        .select('client_session_id, game_id, score, played_at, duration_sec, hints_used, hint_penalty, details')
         .eq('user_id', userId)
         .order('played_at')
         .order('client_session_id')
@@ -150,6 +154,8 @@ export async function fetchProgress(userId: string): Promise<SavedProgress | nul
           gameId,
           points: row.score,
           durationSec: row.duration_sec ?? 0,
+          hintsUsed: row.hints_used,
+          hintPenalty: row.hint_penalty,
           stats: row.details?.stats ?? [],
           highlight: row.details?.highlight ?? formatNumber(row.score),
           playedAt: toDayKey(new Date(row.played_at)),

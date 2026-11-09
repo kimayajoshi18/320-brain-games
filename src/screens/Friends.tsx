@@ -1,13 +1,20 @@
-import { useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import MainShell from '../components/MainShell.tsx'
-import { FRIENDS } from '../data/mock.ts'
-import { addDays, weekdayIndex } from '../lib/date.ts'
+import { GAMES, GAME_IDS, type GameId } from '../data/games.ts'
+import {
+  addFriendByEmail,
+  answerFriendRequest,
+  fetchFriendRequests,
+  fetchLeaderboard,
+  type FriendRequest,
+  type LeaderboardRow,
+  type Period,
+} from '../lib/leaderboard.ts'
+import { supabase } from '../lib/supabase.ts'
 import { formatNumber, plural } from '../lib/format.ts'
 import { useAppState } from '../state/context.ts'
-import { bestPoints } from '../state/store.ts'
 import './Friends.css'
 
-type Range = 'week' | 'allTime'
 
 /** The Contact Picker API is only in some browsers (mostly Chrome on Android). */
 type ContactsNavigator = Navigator & {
@@ -18,10 +25,30 @@ const inviteUrl = () => `${window.location.origin}/?ref=invite`
 
 export default function Friends() {
   const { state, actions } = useAppState()
-  const [range, setRange] = useState<Range>('week')
+  const [range, setRange] = useState<Period>('week')
+  const [game, setGame] = useState<GameId | 'all'>('all')
+  const [friendsOnly, setFriendsOnly] = useState(true)
+  const [board, setBoard] = useState<LeaderboardRow[] | null>(null)
+  const [requests, setRequests] = useState<FriendRequest[]>([])
+  const [email, setEmail] = useState('')
   const [inviteStatus, setInviteStatus] = useState<string | null>(null)
+  const isGuest = state.account.kind === 'guest'
 
-  if (state.account.kind === 'guest') {
+  useEffect(() => {
+    if (isGuest || !supabase) return
+    let current = true
+    void fetchLeaderboard(game, range, friendsOnly).then((rows) => current && setBoard(rows))
+    return () => {
+      current = false
+    }
+  }, [isGuest, game, range, friendsOnly])
+
+  useEffect(() => {
+    if (isGuest || !supabase) return
+    void fetchFriendRequests().then(setRequests)
+  }, [isGuest])
+
+  if (isGuest) {
     return (
       <MainShell>
         <div className="panel friends-signin">
@@ -38,12 +65,21 @@ export default function Friends() {
     )
   }
 
-  const monday = addDays(state.today, -weekdayIndex(state.today))
-  const you = range === 'week' ? bestPoints(state, monday) : bestPoints(state)
-  const rows = [
-    ...FRIENDS.map((f) => ({ name: f.name, score: range === 'week' ? f.week : f.allTime, isYou: false })),
-    { name: 'You', score: you, isYou: true },
-  ].sort((a, b) => b.score - a.score)
+  const rows = board ?? []
+
+  const addFriend = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!email.trim()) return
+    const ok = await addFriendByEmail(email)
+    setInviteStatus(ok ? "Request sent, if that email has an account. They'll see it here." : 'Could not send the request. Try again.')
+    if (ok) setEmail('')
+  }
+
+  const answer = async (request: FriendRequest, accept: boolean) => {
+    if (!(await answerFriendRequest(request.requesterId, accept))) return
+    setRequests((current) => current.filter((r) => r.requesterId !== request.requesterId))
+    if (accept) void fetchLeaderboard(game, range, friendsOnly).then(setBoard)
+  }
 
   const copyLink = async () => {
     try {
@@ -90,16 +126,35 @@ export default function Friends() {
                 <span className="desktop-only">This week</span>
                 <span className="mobile-only">Week</span>
               </button>
-              <button type="button" aria-pressed={range === 'allTime'} onClick={() => setRange('allTime')}>
-                All time
+              <button type="button" aria-pressed={range === 'month'} onClick={() => setRange('month')}>
+                <span className="desktop-only">This month</span>
+                <span className="mobile-only">Month</span>
               </button>
             </div>
+          </div>
+          <div className="friends-head">
+            <div className="segmented" role="group" aria-label="Who to show">
+              <button type="button" aria-pressed={friendsOnly} onClick={() => setFriendsOnly(true)}>
+                Friends
+              </button>
+              <button type="button" aria-pressed={!friendsOnly} onClick={() => setFriendsOnly(false)}>
+                Everyone
+              </button>
+            </div>
+            <select aria-label="Game" value={game} onChange={(e) => setGame(e.target.value as GameId | 'all')}>
+              <option value="all">All games</option>
+              {GAME_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {GAMES[id].name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <ol className="leaderboard">
             {rows.map((row, i) => (
-              <li key={row.name} className={row.isYou ? 'is-you' : undefined} aria-current={row.isYou || undefined}>
-                <span className="rank">{i + 1}</span>
+              <li key={`${row.name}-${i}`} className={row.isYou ? 'is-you' : undefined} aria-current={row.isYou || undefined}>
+                <span className="rank">{row.rank}</span>
                 <span className="mini-avatar" aria-hidden="true">
                   {row.isYou ? '' : row.name[0]}
                 </span>
@@ -108,7 +163,9 @@ export default function Friends() {
               </li>
             ))}
           </ol>
-          <p className="friends-note">Ranked by each player's best single-game score.</p>
+          {board === null && <p className="friends-note">The leaderboard is not available right now.</p>}
+          {board !== null && rows.length === 0 && <p className="friends-note">No scores yet for this period.</p>}
+          <p className="friends-note">Ranked by each player's best single-game score. Weeks start on Monday and months on the 1st (UTC).</p>
           {inviteStatus && (
             <p className="friends-note mobile-only" role="status">
               {inviteStatus}
@@ -118,7 +175,27 @@ export default function Friends() {
 
         <aside className="panel invite" aria-label="Invite friends">
           <b>Invite friends</b>
-          <p>Share a link or find people from your contacts.</p>
+          <p>Share a link, or add a friend by the email they sign in with.</p>
+          <form onSubmit={addFriend} noValidate>
+            <label className="visually-hidden" htmlFor="friend-email">
+              Friend's email
+            </label>
+            <input id="friend-email" type="email" autoComplete="off" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <button type="submit" className="btn btn-dark btn-sm">
+              Add
+            </button>
+          </form>
+          {requests.map((r) => (
+            <p key={r.requesterId}>
+              {r.name} wants to be friends.{' '}
+              <button type="button" className="link-button" onClick={() => answer(r, true)}>
+                Accept
+              </button>{' '}
+              <button type="button" className="link-button" onClick={() => answer(r, false)}>
+                Decline
+              </button>
+            </p>
+          ))}
           <button type="button" className="btn btn-primary btn-sm" onClick={copyLink}>
             Copy link
           </button>

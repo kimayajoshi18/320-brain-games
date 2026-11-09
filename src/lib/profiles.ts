@@ -1,5 +1,6 @@
 import type { User } from '@supabase/supabase-js'
 import { isGameId } from '../data/games.ts'
+import { SURVEY, columnValue, type SurveyAnswers } from '../data/survey.ts'
 import type { Onboarding, PlayTime, Profile } from '../state/types.ts'
 import { supabase } from './supabase.ts'
 
@@ -8,23 +9,24 @@ import { supabase } from './supabase.ts'
 //
 // Column mapping:
 //   display_name   -> Profile.name
-//   recovery_phone -> Profile.recoveryPhone
 //   reminder       -> Profile.reminder
 //   goals          -> Onboarding.focus (game categories: memory, numbers, colors)
 //   play_time      -> Onboarding.when
-//   survey         -> { completed_at } once the onboarding survey is done (or skipped); null before
+//   age_range      -> the age answer of the survey
+//   survey         -> { completed_at, answers } once the onboarding survey is done (or skipped); null before.
+//                     `answers` holds every question by id, the games question under 'focus'.
 //   timezone       -> the browser's IANA time zone, kept up to date on sign-in
 
-const COLUMNS = 'display_name, recovery_phone, reminder, goals, play_time, survey, timezone'
+const COLUMNS = 'display_name, reminder, goals, play_time, survey, timezone'
 const PLAY_TIMES: PlayTime[] = ['commute', 'morning', 'evening', 'whenever']
 
 interface ProfileRow {
   display_name: string
-  recovery_phone: string | null
   reminder: string | null
   goals: string[]
   play_time: string | null
-  survey: { completed_at?: string } | null
+  age_range: string | null
+  survey: { completed_at?: string; answers?: SurveyAnswers } | null
   timezone: string
 }
 
@@ -68,12 +70,13 @@ export async function fetchProfile(userId: string): Promise<RemoteProfile | null
   if (timeZone && timeZone !== data.timezone) void saveRow(userId, { timezone: timeZone })
 
   return {
-    profile: { name: data.display_name, recoveryPhone: data.recovery_phone, reminder: data.reminder },
+    profile: { name: data.display_name, reminder: data.reminder },
     onboarding: data.survey
       ? {
           complete: true,
           focus: data.goals.filter(isGameId),
           when: PLAY_TIMES.find((t) => t === data.play_time) ?? null,
+          answers: Object.fromEntries(Object.entries(data.survey.answers ?? {}).filter(([id]) => id !== 'focus')),
         }
       : null,
   }
@@ -89,17 +92,20 @@ async function saveRow(userId: string, row: Partial<ProfileRow>): Promise<void> 
 export function saveProfile(userId: string, changes: Partial<Profile>): Promise<void> {
   const row: Partial<ProfileRow> = {}
   if (changes.name !== undefined) row.display_name = changes.name
-  if (changes.recoveryPhone !== undefined) row.recovery_phone = changes.recoveryPhone
   if (changes.reminder !== undefined) row.reminder = changes.reminder
   return saveRow(userId, row)
 }
 
 /** Saves the onboarding survey answers, plus the reminder they set. */
 export function saveOnboarding(userId: string, answers: Omit<Onboarding, 'complete'>, reminder?: string | null): Promise<void> {
+  const picked = answers.answers ?? {}
+  const age = SURVEY.find((q) => q.kind === 'choice' && q.column === 'age_range')
+  const ageRange = age ? columnValue(age, picked) : undefined
   return saveRow(userId, {
     goals: answers.focus,
     play_time: answers.when,
-    survey: { completed_at: new Date().toISOString() },
+    ...(ageRange !== undefined && { age_range: ageRange }),
+    survey: { completed_at: new Date().toISOString(), answers: { ...picked, focus: answers.focus } },
     ...(reminder !== undefined && { reminder }),
   })
 }

@@ -37,7 +37,7 @@ export function createDemoAccount(today: DayKey): AppState {
   return {
     account: {
       kind: 'google',
-      profile: { name: 'Sam R.', recoveryPhone: null, reminder: '8:00am' },
+      profile: { name: 'Sam R.', reminder: '8:00am' },
     },
     onboarding: { complete: true, focus: [], when: 'commute' },
     today,
@@ -54,16 +54,3 @@ export function createDemoAccount(today: DayKey): AppState {
     lastResult: null,
   }
 }
-
-export interface Friend {
-  name: string
-  week: number
-  allTime: number
-}
-
-export const FRIENDS: Friend[] = [
-  { name: 'Alex', week: 1380, allTime: 1520 },
-  { name: 'Priya', week: 1190, allTime: 1640 },
-  { name: 'Jordan', week: 960, allTime: 1050 },
-  { name: 'Mei', week: 910, allTime: 1200 },
-]

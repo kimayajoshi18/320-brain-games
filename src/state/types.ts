@@ -1,4 +1,5 @@
 import type { GameId } from '../data/games.ts'
+import type { SurveyAnswers } from '../data/survey.ts'
 import type { DayKey } from '../lib/date.ts'
 
 export type PlayTime = 'commute' | 'morning' | 'evening' | 'whenever'
@@ -12,6 +13,9 @@ export interface GameResult {
   /** How this result reads in the high-score table, e.g. "1,240", "2:04" or "5/5". */
   highlight: string
   playedAt: DayKey
+  /** Hints used and the seconds they added to the time. The points already include the penalty. */
+  hintsUsed?: number
+  hintPenalty?: number
   /** Unique id for this play, saved as game_sessions.client_session_id. Added when the result is recorded. */
   id?: string
   /** When the game finished (ISO time), saved as game_sessions.played_at. Added when the result is recorded. */
@@ -23,11 +27,12 @@ export interface Onboarding {
   /** Games the player wants to work on; these go first in the daily three. */
   focus: GameId[]
   when: PlayTime | null
+  /** Answers to the other survey questions (see data/survey.ts). */
+  answers?: SurveyAnswers
 }
 
 export interface Profile {
   name: string
-  recoveryPhone: string | null
   /** Daily reminder time, e.g. "8:00am", or null for none. */
   reminder: string | null
 }
@@ -55,4 +60,6 @@ export interface AppState {
   topScores: Record<GameId, GameResult[]>
   gamesPlayed: number
   lastResult: LastResult | null
+  /** Names of the achievements the database says this signed-in player has earned (a cache; absent until first loaded). */
+  earnedAchievements?: string[]
 }

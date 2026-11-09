@@ -1,4 +1,3 @@
-import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router'
 import MainShell from '../components/MainShell.tsx'
 import { ACHIEVEMENTS } from '../data/achievements.ts'
@@ -26,7 +25,13 @@ export default function Profile() {
   const navigate = useNavigate()
   const profile = state.account.kind === 'google' ? state.account.profile : null
 
-  const achievements = ACHIEVEMENTS.map((a) => ({ ...a, isEarned: a.earned(state) })).sort(
+  // Signed-in players get their achievements from the database; guests and the demo account use local play.
+  const fromDatabase = state.account.kind === 'google' && state.account.userId !== undefined
+  const earnedNames = new Set((state.earnedAchievements ?? []).map((n) => n.trim().toLowerCase()))
+  const achievements = ACHIEVEMENTS.map((a) => ({
+    ...a,
+    isEarned: fromDatabase ? earnedNames.has(a.name.trim().toLowerCase()) : a.earned(state),
+  })).sort(
     (a, b) => Number(b.isEarned) - Number(a.isEarned),
   )
 
@@ -56,6 +61,7 @@ export default function Profile() {
               <AccountSettings
                 profile={profile}
                 onChange={actions.updateProfile}
+                onRedoSurvey={() => navigate('/onboarding?redo=1')}
                 onSignOut={() => {
                   actions.signOut()
                   navigate('/')
@@ -107,65 +113,14 @@ export default function Profile() {
 interface AccountSettingsProps {
   profile: ProfileData
   onChange: (changes: Partial<ProfileData>) => void
+  onRedoSurvey: () => void
   onSignOut: () => void
 }
 
-function AccountSettings({ profile, onChange, onSignOut }: AccountSettingsProps) {
-  const [editingPhone, setEditingPhone] = useState(false)
-  const [phone, setPhone] = useState(profile.recoveryPhone ?? '')
-  const [phoneError, setPhoneError] = useState<string | null>(null)
-
-  const savePhone = (event: FormEvent) => {
-    event.preventDefault()
-    const digits = phone.replace(/\D/g, '')
-    if (digits.length < 7 || digits.length > 15) {
-      setPhoneError('Enter a phone number with 7 to 15 digits.')
-      return
-    }
-    onChange({ recoveryPhone: phone.trim() })
-    setPhoneError(null)
-    setEditingPhone(false)
-  }
-
+function AccountSettings({ profile, onChange, onRedoSurvey, onSignOut }: AccountSettingsProps) {
   return (
     <>
       <span>Google login</span>
-
-      {editingPhone ? (
-        <form onSubmit={savePhone} noValidate>
-          <label className="visually-hidden" htmlFor="recovery-phone">
-            Recovery phone
-          </label>
-          <input
-            id="recovery-phone"
-            type="tel"
-            autoComplete="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            aria-invalid={phoneError !== null}
-            aria-describedby={phoneError ? 'recovery-phone-error' : undefined}
-            autoFocus
-          />
-          <button type="submit" className="btn btn-dark btn-sm">
-            Save
-          </button>
-          <button type="button" className="btn btn-outline btn-sm" onClick={() => setEditingPhone(false)}>
-            Cancel
-          </button>
-          {phoneError && (
-            <span id="recovery-phone-error" className="error">
-              {phoneError}
-            </span>
-          )}
-        </form>
-      ) : (
-        <span>
-          Recovery phone:{' '}
-          <button type="button" className="link-button" onClick={() => setEditingPhone(true)}>
-            {profile.recoveryPhone ?? 'add'}
-          </button>
-        </span>
-      )}
 
       <label>
         Reminder:{' '}
@@ -181,6 +136,12 @@ function AccountSettings({ profile, onChange, onSignOut }: AccountSettingsProps)
           <option value="off">Off</option>
         </select>
       </label>
+
+      <span>
+        <button type="button" className="link-button" onClick={onRedoSurvey}>
+          Redo survey
+        </button>
+      </span>
 
       <span>
         <button type="button" className="link-button" onClick={onSignOut}>
