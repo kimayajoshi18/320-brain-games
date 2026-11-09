@@ -3,7 +3,7 @@
 
 create unique index if not exists achievements_name_key on public.achievements (name);
 
--- The app has no tiers, so the gold and silver ones use the word from their name and the rest are 'milestone'.
+-- The tier column only allows bronze, silver and gold; the app has no tiers, so these are chosen here.
 -- The rules live in puzzlr_award_achievements (backend_sprint4.sql), matched by name.
 do $$
 declare
@@ -17,28 +17,28 @@ begin
     insert into public.achievements (name, tier, description)
     select v.name, v.tier, v.description
       from (values
-        ('7-day streak', 'milestone', 'Finish the daily three 7 days in a row'),
+        ('7-day streak', 'bronze', 'Finish the daily three 7 days in a row'),
         ('Memory gold', 'gold', 'Score 1,200 in Memory'),
-        ('50 games', 'milestone', 'Play 50 games'),
+        ('50 games', 'bronze', 'Play 50 games'),
         ('Number silver', 'silver', 'Score 1,100 in Numbers'),
-        ('30-day streak', 'milestone', 'Finish the daily three 30 days in a row'),
+        ('30-day streak', 'silver', 'Finish the daily three 30 days in a row'),
         ('Colors gold', 'gold', 'Score 1,200 in Colors')
       ) as v(name, tier, description)
-    on conflict (name) do nothing;
+    on conflict (name) do update set tier = excluded.tier, description = excluded.description;
   else
     insert into public.achievements (id, name, tier, description)
     select (select coalesce(max(id), 0) from public.achievements) + row_number() over (order by v.ord),
            v.name, v.tier, v.description
       from (values
-        (1, '7-day streak', 'milestone', 'Finish the daily three 7 days in a row'),
+        (1, '7-day streak', 'bronze', 'Finish the daily three 7 days in a row'),
         (2, 'Memory gold', 'gold', 'Score 1,200 in Memory'),
-        (3, '50 games', 'milestone', 'Play 50 games'),
+        (3, '50 games', 'bronze', 'Play 50 games'),
         (4, 'Number silver', 'silver', 'Score 1,100 in Numbers'),
-        (5, '30-day streak', 'milestone', 'Finish the daily three 30 days in a row'),
+        (5, '30-day streak', 'silver', 'Finish the daily three 30 days in a row'),
         (6, 'Colors gold', 'gold', 'Score 1,200 in Colors')
       ) as v(ord, name, tier, description)
      where not exists (select 1 from public.achievements a where a.name = v.name)
-    on conflict (name) do nothing;
+    on conflict (name) do update set tier = excluded.tier, description = excluded.description;
   end if;
 end $$;
 
