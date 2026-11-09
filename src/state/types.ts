@@ -60,4 +60,6 @@ export interface AppState {
   topScores: Record<GameId, GameResult[]>
   gamesPlayed: number
   lastResult: LastResult | null
+  /** Names of the achievements the database says this signed-in player has earned (a cache; absent until first loaded). */
+  earnedAchievements?: string[]
 }

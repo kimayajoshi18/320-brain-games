@@ -25,7 +25,13 @@ export default function Profile() {
   const navigate = useNavigate()
   const profile = state.account.kind === 'google' ? state.account.profile : null
 
-  const achievements = ACHIEVEMENTS.map((a) => ({ ...a, isEarned: a.earned(state) })).sort(
+  // Signed-in players get their achievements from the database; guests and the demo account use local play.
+  const fromDatabase = state.account.kind === 'google' && state.account.userId !== undefined
+  const earnedNames = new Set((state.earnedAchievements ?? []).map((n) => n.trim().toLowerCase()))
+  const achievements = ACHIEVEMENTS.map((a) => ({
+    ...a,
+    isEarned: fromDatabase ? earnedNames.has(a.name.trim().toLowerCase()) : a.earned(state),
+  })).sort(
     (a, b) => Number(b.isEarned) - Number(a.isEarned),
   )
 

@@ -1,6 +1,7 @@
 import type { User } from '@supabase/supabase-js'
 import { useEffect, useMemo, useReducer, useRef, useState, type Dispatch, type ReactNode } from 'react'
 import { createDemoAccount } from '../data/mock.ts'
+import { fetchEarnedAchievements } from '../lib/achievements.ts'
 import { todayKey } from '../lib/date.ts'
 import { displayNameFor, fetchProfile, saveOnboarding, saveProfile } from '../lib/profiles.ts'
 import { fetchProgress, flushPending, queueResults, stamp } from '../lib/sessions.ts'
@@ -65,6 +66,7 @@ type Action =
   | { type: 'authUser'; user: User }
   | { type: 'profileLoaded'; userId: string; profile: Profile; onboarding: Onboarding | null }
   | { type: 'progressLoaded'; userId: string; results: GameResult[]; longestStreak: number }
+  | { type: 'achievementsLoaded'; userId: string; names: string[] }
   | { type: 'completeOnboarding'; answers: Parameters<AppActions['completeOnboarding']>[0] }
   | { type: 'recordResult'; result: Parameters<AppActions['recordResult']>[0] }
   | { type: 'updateProfile'; changes: Parameters<AppActions['updateProfile']>[0] }
@@ -93,6 +95,9 @@ function reducer(state: AppState, action: Action): AppState {
     case 'progressLoaded':
       if (state.account.kind !== 'google' || state.account.userId !== action.userId) return state
       return store.rebuildFromResults(state, action.results, action.longestStreak)
+    case 'achievementsLoaded':
+      if (state.account.kind !== 'google' || state.account.userId !== action.userId) return state
+      return { ...state, earnedAchievements: action.names }
     case 'completeOnboarding':
       return store.completeOnboarding(state, action.answers)
     case 'recordResult':
@@ -132,6 +137,7 @@ async function loadAccount(user: User, guest: GuestProgress, dispatch: Dispatch<
 
   if (guest.results.length) queueResults(user.id, guest.results)
   const unsaved = await flushPending(user.id)
+  await refreshAchievements(user.id, dispatch)
   const saved = await fetchProgress(user.id)
   if (saved) {
     // Games that couldn't be uploaded yet still count on this device.
@@ -139,6 +145,12 @@ async function loadAccount(user: User, guest: GuestProgress, dispatch: Dispatch<
     const results = [...saved.results, ...unsaved.filter((r) => !savedIds.has(r.id))]
     dispatch({ type: 'progressLoaded', userId: user.id, results, longestStreak: saved.longestStreak })
   }
+}
+
+/** Loads the earned achievements; on failure the cached ones stay. */
+async function refreshAchievements(userId: string, dispatch: Dispatch<Action>) {
+  const earned = await fetchEarnedAchievements()
+  if (earned) dispatch({ type: 'achievementsLoaded', userId, names: earned.map((a) => a.name) })
 }
 
 export default function AppStateProvider({ children }: { children: ReactNode }) {
@@ -211,7 +223,10 @@ export default function AppStateProvider({ children }: { children: ReactNode }) 
         const userId = remoteUserId(latest.current)
         if (userId) {
           queueResults(userId, [recorded])
-          void flushPending(userId)
+          // The database awards achievements when a session is inserted, so look again once one has uploaded.
+          void flushPending(userId).then((left) => {
+            if (!left.some((r) => r.id === recorded.id)) void refreshAchievements(userId, dispatch)
+          })
         }
       },
       updateProfile: (changes) => {
