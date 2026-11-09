@@ -39,10 +39,10 @@ There's no backend yet, so a few things are stand-ins:
 - **Saving.** Signed-in progress is stored in `localStorage`. Guest progress only lasts for the browser tab, matching "progress isn't saved until they sign in". To start over, clear the site's storage.
 - **Friends** on the leaderboard are made-up data in `src/data/mock.ts`.
 - **Memory and Numbers** don't have wireframes yet. Their screens are placeholders with a "Finish with a sample score" button so the rest of the flow can be tried.
-- **"Why this helps"** text on the results screen still needs real sources.
+- **"Why this helps"** text on the results screen still needs real sources for Memory and Numbers. Colors cites Clark et al. (2015), "Improvement in visual search with practice", *Journal of Neuroscience* 35(13), 5351–5359, https://doi.org/10.1523/JNEUROSCI.1152-14.2015.
 - **Not built yet:** working offline, sending reminders, and sending invites to contacts.
 
-Spot The Difference is fully playable. Wrong taps add 3 seconds, hints add 5, and you can't fail. Everyone gets the same puzzle each day; practice rounds get a new one.
+Spot The Difference is fully playable. Wrong taps cost 50 points and hints cost 100 (the score never goes below 0), and you can't fail. Everyone gets the same puzzle each day; practice rounds get a new one.
 
 ## Layout of `src/`
 

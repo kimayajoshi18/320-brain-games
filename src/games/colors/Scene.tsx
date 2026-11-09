@@ -78,14 +78,7 @@ export default function Scene({ label, scene, puzzle, shapes, found, hinted, mis
           />
         )
       })}
-      {hinted !== null && scene === 'b' && (
-        <circle
-          className="scene-hint"
-          cx={puzzle.shapes[hinted].x}
-          cy={puzzle.shapes[hinted].y}
-          r={puzzle.shapes[hinted].r + 22}
-        />
-      )}
+      {hinted !== null && <rect className="scene-hint" {...puzzle.hintAreas.get(hinted)} />}
       {misses
         .filter((m) => m.scene === scene)
         .map((m) => (

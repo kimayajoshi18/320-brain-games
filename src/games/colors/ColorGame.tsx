@@ -6,12 +6,17 @@ import { useAppState } from '../../state/context.ts'
 import ExitLink from '../ExitLink.tsx'
 import GameTimer, { type Penalty } from '../GameTimer.tsx'
 import { gameHeading } from '../heading.ts'
-import { createPuzzle, differenceAt, DIFFERENCE_COUNT, scoreFor, shapesForScene } from './puzzle.ts'
+import {
+  createPuzzle,
+  differenceAt,
+  DIFFERENCE_COUNT,
+  HINT_POINTS,
+  scoreFor,
+  shapesForScene,
+  WRONG_TAP_POINTS,
+} from './puzzle.ts'
 import Scene, { type Miss } from './Scene.tsx'
 import '../game.css'
-
-const WRONG_TAP_SECONDS = 3
-const HINT_SECONDS = 5
 
 export default function ColorGame() {
   const { state, actions } = useAppState()
@@ -29,7 +34,6 @@ export default function ColorGame() {
   const [misses, setMisses] = useState<Miss[]>([])
   const [hinted, setHinted] = useState<number | null>(null)
   const [elapsed, setElapsed] = useState(0)
-  const [penaltySeconds, setPenaltySeconds] = useState(0)
   const [penalty, setPenalty] = useState<Penalty | null>(null)
   const [wrongTaps, setWrongTaps] = useState(0)
   const [hints, setHints] = useState(0)
@@ -37,7 +41,6 @@ export default function ColorGame() {
   const nextKey = useRef(0)
 
   const finished = finalTime !== null
-  const total = elapsed + penaltySeconds
 
   // Count up until every difference is found.
   useEffect(() => {
@@ -57,10 +60,10 @@ export default function ColorGame() {
       if (hints > 0) stats.push(plural(hints, 'hint'))
       actions.recordResult({
         gameId: 'colors',
-        points: scoreFor(seconds),
+        points: scoreFor({ seconds, wrongTaps, hints }),
         durationSec: seconds,
         hintsUsed: hints,
-        hintPenalty: hints * HINT_SECONDS,
+        hintPenalty: hints * HINT_POINTS,
         stats,
         highlight: `${DIFFERENCE_COUNT}/${DIFFERENCE_COUNT}`,
         playedAt: state.today,
@@ -70,10 +73,8 @@ export default function ColorGame() {
     return () => clearTimeout(timeout)
   }, [finalTime, wrongTaps, hints, actions, navigate, state.today])
 
-  const addPenalty = (seconds: number) => {
-    setPenaltySeconds((p) => p + seconds)
-    setPenalty({ key: nextKey.current++, seconds })
-  }
+  // Mistakes cost points, not time; the score is worked out at the end from the counts.
+  const showPenalty = (points: number) => setPenalty({ key: nextKey.current++, label: `−${points} pts` })
 
   const handleTap = (scene: 'a' | 'b') => (x: number, y: number) => {
     if (finished) return
@@ -83,13 +84,13 @@ export default function ColorGame() {
       setMisses((m) => [...m, { key, x, y, scene }])
       setTimeout(() => setMisses((m) => m.filter((miss) => miss.key !== key)), 800)
       setWrongTaps((n) => n + 1)
-      addPenalty(WRONG_TAP_SECONDS)
+      showPenalty(WRONG_TAP_POINTS)
       return
     }
     const nowFound = [...found, hit]
     setFound(nowFound)
     if (hinted === hit) setHinted(null)
-    if (nowFound.length === DIFFERENCE_COUNT) setFinalTime(total)
+    if (nowFound.length === DIFFERENCE_COUNT) setFinalTime(elapsed)
   }
 
   const showHint = () => {
@@ -97,7 +98,7 @@ export default function ColorGame() {
     if (target === undefined) return
     setHinted(target)
     setHints((n) => n + 1)
-    addPenalty(HINT_SECONDS)
+    showPenalty(HINT_POINTS)
     setTimeout(() => setHinted((current) => (current === target ? null : current)), 1600)
   }
 
@@ -111,7 +112,7 @@ export default function ColorGame() {
             <span className="short">{heading.short}</span>
           </>
         }
-        right={<GameTimer seconds={finalTime ?? total} penalty={penalty} />}
+        right={<GameTimer seconds={finalTime ?? elapsed} penalty={penalty} />}
       />
 
       <main className="game-body">
@@ -146,7 +147,7 @@ export default function ColorGame() {
             className="btn btn-outline btn-sm"
             onClick={showHint}
             disabled={finished || hinted !== null}
-            title={`Shows one difference. Adds ${HINT_SECONDS} seconds.`}
+            title={`Shows one difference. Costs ${HINT_POINTS} points.`}
           >
             Hint
           </button>
