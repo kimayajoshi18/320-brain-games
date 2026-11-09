@@ -59,6 +59,8 @@ export default function ColorGame() {
         gameId: 'colors',
         points: scoreFor(seconds),
         durationSec: seconds,
+        hintsUsed: hints,
+        hintPenalty: hints * HINT_SECONDS,
         stats,
         highlight: `${DIFFERENCE_COUNT}/${DIFFERENCE_COUNT}`,
         playedAt: state.today,
