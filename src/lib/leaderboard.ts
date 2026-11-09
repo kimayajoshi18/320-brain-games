@@ -11,7 +11,7 @@ export interface LeaderboardRow {
 }
 
 export interface FriendRequest {
-  id: string
+  requesterId: string
   name: string
 }
 
@@ -53,15 +53,15 @@ export async function fetchFriendRequests(): Promise<FriendRequest[]> {
     console.error('Could not load friend requests:', error.message)
     return []
   }
-  return (data as { id: string; display_name: string }[]).map((r) => ({ id: r.id, name: r.display_name }))
+  return (data as { requester_id: string; display_name: string }[]).map((r) => ({ requesterId: r.requester_id, name: r.display_name }))
 }
 
-/** Accepts a request, or turns it down by deleting it. */
-export async function answerFriendRequest(id: string, accept: boolean): Promise<boolean> {
+/** Accepts a request sent by `requesterId`, or turns it down by deleting it. Row level security limits this to requests sent to you. */
+export async function answerFriendRequest(requesterId: string, accept: boolean): Promise<boolean> {
   if (!supabase) return false
   const { error } = accept
-    ? await supabase.from('friendships').update({ status: 'accepted' }).eq('id', id)
-    : await supabase.from('friendships').delete().eq('id', id)
+    ? await supabase.from('friendships').update({ status: 'accepted' }).eq('requester_id', requesterId)
+    : await supabase.from('friendships').delete().eq('requester_id', requesterId)
   if (error) console.error('Could not answer the friend request:', error.message)
   return !error
 }

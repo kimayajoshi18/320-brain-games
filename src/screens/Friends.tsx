@@ -76,8 +76,8 @@ export default function Friends() {
   }
 
   const answer = async (request: FriendRequest, accept: boolean) => {
-    if (!(await answerFriendRequest(request.id, accept))) return
-    setRequests((current) => current.filter((r) => r.id !== request.id))
+    if (!(await answerFriendRequest(request.requesterId, accept))) return
+    setRequests((current) => current.filter((r) => r.requesterId !== request.requesterId))
     if (accept) void fetchLeaderboard(game, range, friendsOnly).then(setBoard)
   }
 
@@ -186,7 +186,7 @@ export default function Friends() {
             </button>
           </form>
           {requests.map((r) => (
-            <p key={r.id}>
+            <p key={r.requesterId}>
               {r.name} wants to be friends.{' '}
               <button type="button" className="link-button" onClick={() => answer(r, true)}>
                 Accept

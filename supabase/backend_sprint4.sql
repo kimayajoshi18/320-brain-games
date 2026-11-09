@@ -10,7 +10,7 @@ language sql as $$
     select 1 from pg_index i
     where i.indrelid = tbl and i.indisunique and i.indpred is null and i.indexprs is null
       and (select array_agg(a.attname::text order by a.attname) from pg_attribute a
-            where a.attrelid = i.indrelid and a.attnum = any (i.indkey::int2[]))
+            where a.attrelid = i.indrelid and a.attnum = any (i.indkey))
         = (select array_agg(c order by c) from unnest(cols) c)
   )
 $$;
@@ -246,13 +246,18 @@ revoke execute on function public.puzzlr_handle_new_user() from public, anon, au
 -- ---------- Friends ----------
 
 create table if not exists public.friendships (
-  id uuid primary key default gen_random_uuid(),
   requester_id uuid not null references auth.users (id) on delete cascade,
   addressee_id uuid not null references auth.users (id) on delete cascade,
   status text not null default 'pending' check (status in ('pending', 'accepted')),
   created_at timestamptz not null default now(),
+  primary key (requester_id, addressee_id),
   constraint friendships_not_self check (requester_id <> addressee_id)
 );
+
+-- In case the table was made earlier without these.
+alter table public.friendships
+  add column if not exists status text not null default 'pending',
+  add column if not exists created_at timestamptz not null default now();
 
 -- One row per pair, whichever way round the request was sent.
 create unique index if not exists friendships_pair_key
@@ -293,31 +298,32 @@ set search_path = ''
 as $$
 declare
   me uuid := (select auth.uid());
-  other uuid;
+  target uuid;
 begin
   if me is null then
     raise exception 'Sign in first';
   end if;
-  select u.id into other from auth.users u where lower(u.email) = lower(trim(p_email)) limit 1;
-  if other is null or other = me then
+  select u.id into target from auth.users u where lower(u.email) = lower(trim(p_email)) limit 1;
+  if target is null or target = me then
     return;
   end if;
   update public.friendships
      set status = 'accepted'
-   where requester_id = other and addressee_id = me and status = 'pending';
-  insert into public.friendships (requester_id, addressee_id) values (me, other) on conflict do nothing;
+   where requester_id = target and addressee_id = me and status = 'pending';
+  insert into public.friendships (requester_id, addressee_id, status) values (me, target, 'pending') on conflict do nothing;
 end;
 $$;
 
 -- Requests waiting for the signed-in player to accept, with the sender's display name only.
-create or replace function public.puzzlr_friend_requests()
-returns table (id uuid, display_name text)
+drop function if exists public.puzzlr_friend_requests();
+create function public.puzzlr_friend_requests()
+returns table (requester_id uuid, display_name text)
 language sql
 stable
 security definer
 set search_path = ''
 as $$
-  select f.id, p.display_name::text
+  select f.requester_id, p.display_name::text
     from public.friendships f
     join public.profiles p on p.id = f.requester_id
    where f.addressee_id = (select auth.uid()) and f.status = 'pending'
@@ -328,7 +334,8 @@ $$;
 
 -- p_game_id is a games.category ('memory', 'numbers', 'colors') or 'all' for the best single score in any game.
 -- p_period 'week' starts on Monday 00:00 UTC, 'month' on the 1st 00:00 UTC. Returns display names and scores only.
-create or replace function public.puzzlr_leaderboard(p_game_id text, p_period text, p_friends_only boolean)
+drop function if exists public.puzzlr_leaderboard(text, text, boolean);
+create function public.puzzlr_leaderboard(p_game_id text, p_period text, p_friends_only boolean)
 returns table (display_name text, score integer, rank integer, is_you boolean)
 language sql
 stable
@@ -339,7 +346,7 @@ as $$
     select case p_period
              when 'week' then date_trunc('week', now() at time zone 'UTC') at time zone 'UTC'
              when 'month' then date_trunc('month', now() at time zone 'UTC') at time zone 'UTC'
-           end as at
+           end as starts
   ),
   players as (
     select (select auth.uid()) as uid
@@ -353,7 +360,7 @@ as $$
     select s.user_id, max(s.score)::integer as top
       from public.game_sessions s
       join public.games g on g.id = s.game_id
-     where s.played_at >= (select at from since)
+     where s.played_at >= (select starts from since)
        and (p_game_id is null or lower(p_game_id) = 'all' or lower(g.category) = lower(p_game_id))
        and (not p_friends_only or s.user_id in (select uid from players))
      group by s.user_id
