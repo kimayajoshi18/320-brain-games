@@ -2,16 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import TaskHeader from '../../components/TaskHeader.tsx'
 import { formatDuration, plural } from '../../lib/format.ts'
+import { colorsPoints, HINT_PENALTY_SECONDS, MISTAKE_PENALTY_SECONDS } from '../../lib/scoring.ts'
 import { useAppState } from '../../state/context.ts'
 import ExitLink from '../ExitLink.tsx'
 import GameTimer, { type Penalty } from '../GameTimer.tsx'
 import { gameHeading } from '../heading.ts'
-import { createPuzzle, differenceAt, DIFFERENCE_COUNT, scoreFor, shapesForScene } from './puzzle.ts'
+import { createPuzzle, differenceAt, DIFFERENCE_COUNT, shapesForScene } from './puzzle.ts'
 import Scene, { type Miss } from './Scene.tsx'
 import '../game.css'
-
-const WRONG_TAP_SECONDS = 3
-const HINT_SECONDS = 5
 
 export default function ColorGame() {
   const { state, actions } = useAppState()
@@ -57,10 +55,10 @@ export default function ColorGame() {
       if (hints > 0) stats.push(plural(hints, 'hint'))
       actions.recordResult({
         gameId: 'colors',
-        points: scoreFor(seconds),
+        points: colorsPoints({ seconds: Math.round(finalTime - penaltySeconds), wrongTaps, hints }),
         durationSec: seconds,
         hintsUsed: hints,
-        hintPenalty: hints * HINT_SECONDS,
+        hintPenalty: hints * HINT_PENALTY_SECONDS,
         stats,
         highlight: `${DIFFERENCE_COUNT}/${DIFFERENCE_COUNT}`,
         playedAt: state.today,
@@ -68,7 +66,7 @@ export default function ColorGame() {
       navigate('/results')
     }, 700)
     return () => clearTimeout(timeout)
-  }, [finalTime, wrongTaps, hints, actions, navigate, state.today])
+  }, [finalTime, penaltySeconds, wrongTaps, hints, actions, navigate, state.today])
 
   const addPenalty = (seconds: number) => {
     setPenaltySeconds((p) => p + seconds)
@@ -83,7 +81,7 @@ export default function ColorGame() {
       setMisses((m) => [...m, { key, x, y, scene }])
       setTimeout(() => setMisses((m) => m.filter((miss) => miss.key !== key)), 800)
       setWrongTaps((n) => n + 1)
-      addPenalty(WRONG_TAP_SECONDS)
+      addPenalty(MISTAKE_PENALTY_SECONDS)
       return
     }
     const nowFound = [...found, hit]
@@ -97,7 +95,7 @@ export default function ColorGame() {
     if (target === undefined) return
     setHinted(target)
     setHints((n) => n + 1)
-    addPenalty(HINT_SECONDS)
+    addPenalty(HINT_PENALTY_SECONDS)
     setTimeout(() => setHinted((current) => (current === target ? null : current)), 1600)
   }
 
@@ -146,7 +144,7 @@ export default function ColorGame() {
             className="btn btn-outline btn-sm"
             onClick={showHint}
             disabled={finished || hinted !== null}
-            title={`Shows one difference. Adds ${HINT_SECONDS} seconds.`}
+            title={`Shows one difference. Adds ${HINT_PENALTY_SECONDS} seconds.`}
           >
             Hint
           </button>

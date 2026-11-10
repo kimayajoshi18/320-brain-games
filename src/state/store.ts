@@ -104,12 +104,17 @@ export function mergeGuestIntoAccount(account: AppState, guest: AppState): AppSt
 
 /**
  * Rebuilds a player's progress from every game they have played (as loaded from the server),
- * by replaying them in order through the same rules as live play. Account, survey and the
+ * by replaying them in order through the same rules as live play. Account, survey, achievements and the
  * results screen are kept from `state`.
  */
 export function rebuildFromResults(state: AppState, results: GameResult[], longestStreak = 0): AppState {
   const ordered = [...results].sort((a, b) => (a.finishedAt ?? a.playedAt).localeCompare(b.finishedAt ?? b.playedAt))
-  let rebuilt: AppState = { ...createGuestState(state.today), account: state.account, onboarding: state.onboarding }
+  let rebuilt: AppState = {
+    ...createGuestState(state.today),
+    account: state.account,
+    onboarding: state.onboarding,
+    earnedAchievements: state.earnedAchievements,
+  }
   for (const result of ordered) rebuilt = recordResult(rollToDay(rebuilt, result.playedAt), result)
   rebuilt = rollToDay(rebuilt, state.today)
   return { ...rebuilt, bestStreak: Math.max(rebuilt.bestStreak, longestStreak), lastResult: state.lastResult }

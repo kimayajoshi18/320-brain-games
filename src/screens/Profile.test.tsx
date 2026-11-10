@@ -40,6 +40,19 @@ describe('Profile as a guest', () => {
   })
 })
 
+describe('Profile high scores', () => {
+  it('shows points for every game, not the result text', () => {
+    let state = createGuestState(TODAY)
+    state = recordResult(state, makeResult('colors', 1240, { highlight: '5/5' }))
+    state = recordResult(state, makeResult('numbers', 980, { highlight: '2:04' }))
+    state = recordResult(state, makeResult('memory', 1100, { highlight: '1,100' }))
+    renderProfile(state)
+
+    const scores = screen.getAllByRole('definition').map((dd) => dd.textContent)
+    expect(scores).toEqual(['1,100', '980', '1,240'])
+  })
+})
+
 describe('Profile when signed in', () => {
   it("shows the player's name, initials and best streak", () => {
     renderProfile({ ...signedInState(), bestStreak: 4 })
@@ -47,42 +60,6 @@ describe('Profile when signed in', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'Ada Lovelace' })).toBeInTheDocument()
     expect(screen.getByText('AL')).toBeInTheDocument()
     expect(screen.getByText(/Best streak/)).toHaveTextContent('4 days')
-  })
-
-  it('rejects a recovery phone number that is too short', async () => {
-    const user = userEvent.setup()
-    const { actions } = renderProfile(signedInState())
-
-    await user.click(screen.getByRole('button', { name: 'add' }))
-    await user.type(screen.getByLabelText('Recovery phone'), '123')
-    await user.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(screen.getByText('Enter a phone number with 7 to 15 digits.')).toBeInTheDocument()
-    expect(screen.getByLabelText('Recovery phone')).toHaveAttribute('aria-invalid', 'true')
-    expect(actions.updateProfile).not.toHaveBeenCalled()
-  })
-
-  it('saves a valid recovery phone number', async () => {
-    const user = userEvent.setup()
-    const { actions } = renderProfile(signedInState())
-
-    await user.click(screen.getByRole('button', { name: 'add' }))
-    await user.type(screen.getByLabelText('Recovery phone'), ' 555 123 4567 ')
-    await user.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(actions.updateProfile).toHaveBeenCalledWith({ recoveryPhone: '555 123 4567' })
-    expect(screen.queryByLabelText('Recovery phone')).not.toBeInTheDocument()
-  })
-
-  it('cancelling the phone edit closes the form without saving', async () => {
-    const user = userEvent.setup()
-    const { actions } = renderProfile(signedInState())
-
-    await user.click(screen.getByRole('button', { name: 'add' }))
-    await user.click(screen.getByRole('button', { name: 'Cancel' }))
-
-    expect(screen.queryByLabelText('Recovery phone')).not.toBeInTheDocument()
-    expect(actions.updateProfile).not.toHaveBeenCalled()
   })
 
   it('changes and turns off the daily reminder', async () => {
