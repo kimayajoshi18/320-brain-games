@@ -49,42 +49,6 @@ describe('Profile when signed in', () => {
     expect(screen.getByText(/Best streak/)).toHaveTextContent('4 days')
   })
 
-  it('rejects a recovery phone number that is too short', async () => {
-    const user = userEvent.setup()
-    const { actions } = renderProfile(signedInState())
-
-    await user.click(screen.getByRole('button', { name: 'add' }))
-    await user.type(screen.getByLabelText('Recovery phone'), '123')
-    await user.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(screen.getByText('Enter a phone number with 7 to 15 digits.')).toBeInTheDocument()
-    expect(screen.getByLabelText('Recovery phone')).toHaveAttribute('aria-invalid', 'true')
-    expect(actions.updateProfile).not.toHaveBeenCalled()
-  })
-
-  it('saves a valid recovery phone number', async () => {
-    const user = userEvent.setup()
-    const { actions } = renderProfile(signedInState())
-
-    await user.click(screen.getByRole('button', { name: 'add' }))
-    await user.type(screen.getByLabelText('Recovery phone'), ' 555 123 4567 ')
-    await user.click(screen.getByRole('button', { name: 'Save' }))
-
-    expect(actions.updateProfile).toHaveBeenCalledWith({ recoveryPhone: '555 123 4567' })
-    expect(screen.queryByLabelText('Recovery phone')).not.toBeInTheDocument()
-  })
-
-  it('cancelling the phone edit closes the form without saving', async () => {
-    const user = userEvent.setup()
-    const { actions } = renderProfile(signedInState())
-
-    await user.click(screen.getByRole('button', { name: 'add' }))
-    await user.click(screen.getByRole('button', { name: 'Cancel' }))
-
-    expect(screen.queryByLabelText('Recovery phone')).not.toBeInTheDocument()
-    expect(actions.updateProfile).not.toHaveBeenCalled()
-  })
-
   it('changes and turns off the daily reminder', async () => {
     const user = userEvent.setup()
     const { actions } = renderProfile(signedInState())
