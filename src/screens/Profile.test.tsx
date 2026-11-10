@@ -40,6 +40,19 @@ describe('Profile as a guest', () => {
   })
 })
 
+describe('Profile high scores', () => {
+  it('shows points for every game, not the result text', () => {
+    let state = createGuestState(TODAY)
+    state = recordResult(state, makeResult('colors', 1240, { highlight: '5/5' }))
+    state = recordResult(state, makeResult('numbers', 980, { highlight: '2:04' }))
+    state = recordResult(state, makeResult('memory', 1100, { highlight: '1,100' }))
+    renderProfile(state)
+
+    const scores = screen.getAllByRole('definition').map((dd) => dd.textContent)
+    expect(scores).toEqual(['1,100', '980', '1,240'])
+  })
+})
+
 describe('Profile when signed in', () => {
   it("shows the player's name, initials and best streak", () => {
     renderProfile({ ...signedInState(), bestStreak: 4 })

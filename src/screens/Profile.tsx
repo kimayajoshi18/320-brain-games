@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router'
 import MainShell from '../components/MainShell.tsx'
 import { ACHIEVEMENTS } from '../data/achievements.ts'
 import { GAMES, GAME_IDS } from '../data/games.ts'
-import { plural } from '../lib/format.ts'
+import { formatNumber, plural } from '../lib/format.ts'
 import { useAppState } from '../state/context.ts'
 import { bestResult } from '../state/store.ts'
 import type { Profile as ProfileData } from '../state/types.ts'
@@ -18,6 +18,11 @@ function initials(name: string) {
     .replace(/[^A-Za-z]/g, '')
     .slice(0, 2)
     .toUpperCase()
+}
+
+/** Points, the same number the leaderboard ranks by. */
+function formatPoints(points: number | undefined) {
+  return points === undefined ? '–' : formatNumber(points)
 }
 
 export default function Profile() {
@@ -100,7 +105,7 @@ export default function Profile() {
             {GAME_IDS.map((id) => (
               <div key={id}>
                 <dt>{GAMES[id].name}</dt>
-                <dd>{bestResult(state, id)?.highlight ?? '–'}</dd>
+                <dd>{formatPoints(bestResult(state, id)?.points)}</dd>
               </div>
             ))}
           </dl>
