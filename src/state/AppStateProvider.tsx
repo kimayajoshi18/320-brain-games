@@ -219,6 +219,8 @@ export default function AppStateProvider({ children }: { children: ReactNode }) 
       },
       recordResult: (result) => {
         const recorded = stamp(result)
+        // A tab left open past midnight must count the game on the day it finished.
+        dispatch({ type: 'newDay', today: recorded.playedAt })
         dispatch({ type: 'recordResult', result: recorded })
         const userId = remoteUserId(latest.current)
         if (userId) {
