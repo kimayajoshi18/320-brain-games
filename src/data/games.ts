@@ -21,7 +21,7 @@ export const GAMES: Record<GameId, GameInfo> = {
     title: 'Memory Match',
     trains: 'Remembering things',
     why: 'Matching pairs trains short-term memory. (Placeholder: source needed.)',
-    playable: false,
+    playable: true,
   },
   numbers: {
     id: 'numbers',
