@@ -1,4 +1,5 @@
 import { createRandom } from '../../lib/random.ts'
+import { colorsPoints } from '../../lib/scoring.ts'
 
 export type ShapeKind = 'circle' | 'square' | 'triangle' | 'diamond'
 
@@ -86,7 +87,7 @@ export function differenceAt(puzzle: Puzzle, x: number, y: number, found: number
   return best?.id ?? null
 }
 
-/** 150 points per difference plus a bonus for finishing under 90 seconds. */
-export function scoreFor(totalSeconds: number): number {
-  return DIFFERENCE_COUNT * 150 + Math.max(0, Math.round((90 - totalSeconds) * 6))
+/** Points for a round with no mistakes or hints (see lib/scoring.ts). */
+export function scoreFor(seconds: number): number {
+  return colorsPoints({ seconds })
 }

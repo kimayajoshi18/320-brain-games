@@ -19,7 +19,7 @@ export const makeResult = (gameId: GameId, points = 930, overrides: Partial<Game
 export function signedInState(): AppState {
   return {
     ...createGuestState(TODAY),
-    account: { kind: 'google', profile: { name: 'Ada Lovelace', recoveryPhone: null, reminder: '8:00am' } },
+    account: { kind: 'google', profile: { name: 'Ada Lovelace', reminder: '8:00am' } },
     onboarding: { complete: true, focus: [], when: 'morning' },
   }
 }

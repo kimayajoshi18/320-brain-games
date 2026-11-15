@@ -26,9 +26,10 @@ interface SessionRow {
   details: { stats?: string[]; highlight?: string } | null
 }
 
-/** Gives a result the id and finish time it needs to be saved. */
+/** Gives a result the id and finish time it needs to be saved. The day always comes from the finish time. */
 export function stamp(result: GameResult): GameResult {
-  return { ...result, id: result.id ?? crypto.randomUUID(), finishedAt: result.finishedAt ?? new Date().toISOString() }
+  const finishedAt = result.finishedAt ?? new Date().toISOString()
+  return { ...result, id: result.id ?? crypto.randomUUID(), finishedAt, playedAt: toDayKey(new Date(finishedAt)) }
 }
 
 // ---------- Pending queue ----------

@@ -268,6 +268,7 @@ alter table public.friendships enable row level security;
 -- Only the status can be changed, and only by the addressee (accepting).
 revoke update on public.friendships from anon, authenticated;
 grant update (status) on public.friendships to authenticated;
+grant update (status) on public.friendships to authenticated;
 
 drop policy if exists "friendships_select_own" on public.friendships;
 drop policy if exists "friendships_insert_requester" on public.friendships;

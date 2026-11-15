@@ -5,6 +5,7 @@ import TaskHeader from '../components/TaskHeader.tsx'
 import { GAMES, type GameId } from '../data/games.ts'
 import { formatDuration, formatNumber } from '../lib/format.ts'
 import { createRandom } from '../lib/random.ts'
+import { memoryPoints, numbersPoints } from '../lib/scoring.ts'
 import { useAppState } from '../state/context.ts'
 import type { GameResult } from '../state/types.ts'
 import ExitLink from './ExitLink.tsx'
@@ -15,19 +16,20 @@ import './game.css'
 function sampleResult(gameId: GameId, seed: string, playedAt: string): GameResult {
   const rand = createRandom(seed)
   if (gameId === 'numbers') {
-    const time = rand.int(100, 180)
+    const time = rand.int(60, 120)
+    const mistakes = rand.next() < 0.6 ? 0 : rand.int(1, 3)
     return {
       gameId,
-      points: 2000 - time * 7,
+      points: numbersPoints({ seconds: time, wrongEntries: mistakes }),
       durationSec: time,
-      stats: [formatDuration(time), rand.next() < 0.6 ? 'No mistakes' : `${rand.int(1, 3)} mistakes`],
+      stats: [formatDuration(time), mistakes === 0 ? 'No mistakes' : `${mistakes} mistakes`],
       highlight: formatDuration(time),
       playedAt,
     }
   }
   const moves = rand.int(12, 20)
   const time = rand.int(40, 70)
-  const points = 1500 - moves * 20 - time * 3 + rand.int(0, 300)
+  const points = memoryPoints({ seconds: time, wrongPairs: moves - 6 })
   return {
     gameId,
     points,
