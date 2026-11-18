@@ -36,7 +36,7 @@ export const GAMES: Record<GameId, GameInfo> = {
     name: 'Colors',
     title: 'Spot The Difference',
     trains: 'Noticing details',
-    why: 'Spotting differences trains visual attention and scanning. (Placeholder: source needed.)',
+    why: 'Practice makes visual search faster. In a five-day study, people got quicker at spotting a target, and brain recordings showed they were directing their attention to it sooner and more strongly. (Clark et al., 2015, Journal of Neuroscience)',
     playable: true,
   },
 }
