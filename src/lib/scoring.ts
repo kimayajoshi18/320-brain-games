@@ -1,4 +1,4 @@
-// Points for all three games on one scale: a finished round is worth 750, plus up to 540 for speed,
+// Points for every game on one scale: a finished round is worth 750, plus up to 540 for speed,
 // so a perfect fast round is about 1,290 whichever game it was. Mistakes and hints cost seconds.
 
 export const HINT_PENALTY_SECONDS = 5
@@ -37,4 +37,9 @@ export function memoryPoints({ seconds, wrongPairs = 0, hints = 0 }: Round & { w
 /** Number grid: every cell filled, wrong entries are the mistakes. */
 export function numbersPoints({ seconds, wrongEntries = 0, hints = 0 }: Round & { wrongEntries?: number }): number {
   return points({ seconds, mistakes: wrongEntries, hints })
+}
+
+/** Color & Word: every round answered, wrong answers are the mistakes. */
+export function colorWordPoints({ seconds, wrongAnswers = 0 }: Round & { wrongAnswers?: number }): number {
+  return points({ seconds, mistakes: wrongAnswers })
 }

@@ -137,7 +137,7 @@ export default function Onboarding() {
         {step === SURVEY.length && (
           <>
             <h1>Your plan</h1>
-            <p className="onboarding-hint">Three games a day, about 6 minutes. Finish all three to add a day to your streak.</p>
+            <p className="onboarding-hint">Four games a day, about 8 minutes. Finish all four to add a day to your streak.</p>
             <ol className="plan-list">
               {plan.map((id) => (
                 <li key={id}>

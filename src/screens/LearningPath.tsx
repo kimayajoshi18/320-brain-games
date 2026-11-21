@@ -74,7 +74,7 @@ export default function LearningPath() {
               </>
             ) : (
               <>
-                <b>Day {path.currentDay} · Today’s three</b>
+                <b>Day {path.currentDay} · Today’s games</b>
                 <span className="muted">{games} · about 6 min</span>
                 {next && (
                   <Link to={`/play/${next}`} className="btn btn-primary btn-sm">

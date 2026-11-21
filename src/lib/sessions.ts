@@ -23,7 +23,7 @@ interface SessionRow {
   duration_sec: number | null
   hints_used: number
   hint_penalty: number
-  details: { stats?: string[]; highlight?: string } | null
+  details: ({ stats?: string[]; highlight?: string } & Record<string, unknown>) | null
 }
 
 /** Gives a result the id and finish time it needs to be saved. The day always comes from the finish time. */
@@ -65,7 +65,7 @@ export function queueResults(userId: string, results: GameResult[]) {
 
 // ---------- Game ids ----------
 
-// `games.category` matches the app's game ids (memory, numbers, colors).
+// `games.category` matches the app's game ids (memory, numbers, colors, colorword).
 let gameIds: Promise<Map<GameId, number>> | null = null
 
 function loadGameIds(): Promise<Map<GameId, number>> {
@@ -84,9 +84,13 @@ function loadGameIds(): Promise<Map<GameId, number>> {
 export async function flushPending(userId: string): Promise<GameResult[]> {
   const pending = readPending(userId)
   if (!supabase || pending.length === 0) return pending
+  let ready: GameResult[]
   try {
     const ids = await loadGameIds()
-    const rows = pending.map((r) => ({
+    // A game the database doesn't list yet stays queued instead of failing the whole upload.
+    ready = pending.filter((r) => ids.has(r.gameId))
+    if (ready.length === 0) return pending
+    const rows = ready.map((r) => ({
       client_session_id: r.id!,
       user_id: userId,
       game_id: ids.get(r.gameId),
@@ -95,7 +99,7 @@ export async function flushPending(userId: string): Promise<GameResult[]> {
       duration_sec: Math.max(0, Math.round(r.durationSec)),
       hints_used: Math.max(0, Math.round(r.hintsUsed ?? 0)),
       hint_penalty: Math.max(0, Math.round(r.hintPenalty ?? 0)),
-      details: { stats: r.stats, highlight: r.highlight },
+      details: { ...r.details, stats: r.stats, highlight: r.highlight },
     }))
     const { error } = await supabase
       .from('game_sessions')
@@ -105,8 +109,8 @@ export async function flushPending(userId: string): Promise<GameResult[]> {
     console.error('Could not save game results; will retry later:', (error as Error).message)
     return pending
   }
-  // Keep anything queued while the upload was in flight.
-  const uploaded = new Set(pending.map((r) => r.id))
+  // Keep anything queued while the upload was in flight, and anything not uploaded.
+  const uploaded = new Set(ready.map((r) => r.id))
   const left = readPending(userId).filter((r) => !uploaded.has(r.id))
   writePending(userId, left)
   return left
@@ -149,6 +153,8 @@ export async function fetchProgress(userId: string): Promise<SavedProgress | nul
     const results = rows.flatMap((row): GameResult[] => {
       const gameId = games.get(row.game_id)
       if (!gameId) return []
+      const { stats, highlight, ...rest } = row.details ?? {}
+      const numbers = Object.entries(rest).filter((e): e is [string, number] => typeof e[1] === 'number')
       return [
         {
           id: row.client_session_id,
@@ -157,8 +163,9 @@ export async function fetchProgress(userId: string): Promise<SavedProgress | nul
           durationSec: row.duration_sec ?? 0,
           hintsUsed: row.hints_used,
           hintPenalty: row.hint_penalty,
-          stats: row.details?.stats ?? [],
-          highlight: row.details?.highlight ?? formatNumber(row.score),
+          stats: stats ?? [],
+          highlight: highlight ?? formatNumber(row.score),
+          ...(numbers.length ? { details: Object.fromEntries(numbers) } : {}),
           playedAt: toDayKey(new Date(row.played_at)),
           finishedAt: row.played_at,
         },

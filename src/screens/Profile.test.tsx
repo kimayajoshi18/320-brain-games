@@ -36,7 +36,7 @@ describe('Profile as a guest', () => {
     renderProfile(recordResult(createGuestState(TODAY), makeResult('colors', 930)))
 
     const scores = screen.getAllByRole('definition').map((dd) => dd.textContent)
-    expect(scores).toEqual(['–', '–', '930'])
+    expect(scores).toEqual(['–', '–', '930', '–'])
   })
 })
 
@@ -49,7 +49,7 @@ describe('Profile high scores', () => {
     renderProfile(state)
 
     const scores = screen.getAllByRole('definition').map((dd) => dd.textContent)
-    expect(scores).toEqual(['1,100', '980', '1,240'])
+    expect(scores).toEqual(['1,100', '980', '1,240', '–'])
   })
 })
 

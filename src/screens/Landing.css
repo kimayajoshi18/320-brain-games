@@ -45,7 +45,7 @@
 
 .landing-games {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   margin-top: auto;
   border-top: var(--rule);
 }
@@ -95,7 +95,7 @@
   }
 
   .landing-art svg {
-    width: 30%;
+    width: 23%;
     height: 100%;
   }
 

@@ -333,7 +333,7 @@ $$;
 
 -- ---------- Leaderboard ----------
 
--- p_game_id is a games.category ('memory', 'numbers', 'colors') or 'all' for the best single score in any game.
+-- p_game_id is a games.category ('memory', 'numbers', 'colors', 'colorword') or 'all' for the best single score in any game.
 -- p_period 'week' starts on Monday 00:00 UTC, 'month' on the 1st 00:00 UTC. Returns display names and scores only.
 drop function if exists public.puzzlr_leaderboard(text, text, boolean);
 create function public.puzzlr_leaderboard(p_game_id text, p_period text, p_friends_only boolean)

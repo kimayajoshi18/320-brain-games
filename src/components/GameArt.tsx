@@ -13,6 +13,7 @@ export default function GameArt({ game, className }: { game: GameId; className?:
       {game === 'memory' && <MemoryArt />}
       {game === 'numbers' && <NumbersArt />}
       {game === 'colors' && <ColorsArt />}
+      {game === 'colorword' && <ColorWordArt />}
     </svg>
   )
 }
@@ -80,6 +81,29 @@ function ColorsArt() {
       <circle cx="79" cy="30" r="8" fill="var(--ink)" stroke="none" />
       <rect x="88" y="44" width="14" height="14" fill="var(--red)" stroke="none" />
       <rect x="84" y="40" width="22" height="22" fill="none" stroke="var(--red)" strokeWidth="2" />
+    </g>
+  )
+}
+
+function ColorWordArt() {
+  const inks = ['var(--stroop-red)', 'var(--stroop-blue)', 'var(--stroop-green)', 'var(--stroop-yellow)']
+  return (
+    <g>
+      <rect x="14" y="6" width="92" height="44" fill="var(--paper)" stroke="var(--ink)" strokeWidth="3" />
+      <text
+        x="60"
+        y="38"
+        textAnchor="middle"
+        fontSize="26"
+        fontWeight="900"
+        fontFamily="var(--font)"
+        fill="var(--stroop-blue)"
+      >
+        RED
+      </text>
+      {inks.map((fill, i) => (
+        <rect key={fill} x={14 + i * 24} y="58" width="20" height="16" fill={fill} />
+      ))}
     </g>
   )
 }
