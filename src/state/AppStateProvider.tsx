@@ -201,7 +201,7 @@ export default function AppStateProvider({ children }: { children: ReactNode }) 
     return () => data.subscription.unsubscribe()
   }, [])
 
-  // Start a fresh daily three when the app is reopened on a new day.
+  // Start a fresh set of daily games when the app is reopened on a new day.
   useEffect(() => {
     const onVisible = () => {
       if (document.visibilityState === 'visible') dispatch({ type: 'newDay', today: todayKey() })

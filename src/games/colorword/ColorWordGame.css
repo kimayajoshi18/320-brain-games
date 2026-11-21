@@ -1,0 +1,235 @@
+/* ---------- Color & Word ---------- */
+
+.colorword {
+  align-items: center;
+}
+
+.colorword > * {
+  width: 100%;
+  max-width: 880px;
+}
+
+.colorword-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.colorword-progress {
+  flex: 1;
+  height: 14px;
+  background: var(--grey-3);
+}
+
+.colorword-progress span {
+  display: block;
+  height: 100%;
+  background: var(--red);
+  transition: width 0.2s ease-out;
+}
+
+.colorword-prompt {
+  font-size: 22px;
+  text-align: center;
+  color: var(--muted);
+}
+
+.colorword-prompt b {
+  color: var(--ink);
+}
+
+/* The word sits on a plain card with a heavy rule; the rule turns green or red for a moment after each answer. */
+.colorword-card {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  max-height: 420px;
+  background: var(--stroop-card);
+  border: var(--rule);
+  transition: border-color 0.12s;
+}
+
+.colorword-card.is-right {
+  border-color: var(--stroop-green);
+}
+
+.colorword-card.is-wrong {
+  border-color: var(--stroop-red);
+  animation: colorword-shake 0.3s;
+}
+
+@keyframes colorword-shake {
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+.colorword-word {
+  font-size: clamp(64px, 14vw, 150px);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: 0.02em;
+  animation: colorword-in 0.15s ease-out;
+}
+
+@keyframes colorword-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+.ink-red {
+  color: var(--stroop-red);
+}
+
+.ink-blue {
+  color: var(--stroop-blue);
+}
+
+.ink-green {
+  color: var(--stroop-green);
+}
+
+.ink-yellow {
+  color: var(--stroop-yellow);
+}
+
+.colorword-feedback {
+  position: absolute;
+  bottom: 16px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.is-right .colorword-feedback {
+  color: var(--stroop-green);
+}
+
+.is-wrong .colorword-feedback {
+  color: var(--stroop-red);
+}
+
+.colorword-choices {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.colorword-choice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  padding: 12px;
+  border: 4px solid var(--choice);
+  background: var(--choice);
+  color: var(--on-stroop);
+  font-size: 24px;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.08s;
+}
+
+.colorword-choice:hover {
+  transform: translateY(-2px);
+}
+
+.colorword-choice:active {
+  transform: translateY(1px);
+}
+
+.colorword-choice kbd {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+/* After an answer, the other buttons step back so the picked one (and the right one, after a miss) stand out. */
+.has-feedback .colorword-choice:not(.is-chosen, .is-answer) {
+  opacity: 0.3;
+}
+
+.colorword-choice.is-chosen,
+.colorword-choice.is-answer {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 7px var(--ink);
+}
+
+.colorword-mark {
+  margin-right: 8px;
+}
+
+.choice-red {
+  --choice: var(--stroop-red);
+}
+
+.choice-blue {
+  --choice: var(--stroop-blue);
+}
+
+.choice-green {
+  --choice: var(--stroop-green);
+}
+
+.choice-yellow {
+  --choice: var(--stroop-yellow);
+  color: var(--on-stroop-yellow);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .colorword-card.is-wrong,
+  .colorword-word {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .colorword-status {
+    gap: 10px;
+    font-size: 16px;
+  }
+
+  .colorword-prompt {
+    font-size: 17px;
+  }
+
+  .colorword-card {
+    min-height: 160px;
+  }
+
+  .colorword-feedback {
+    bottom: 10px;
+    font-size: 18px;
+  }
+
+  .colorword-choices {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .colorword-choice {
+    min-height: 64px;
+    font-size: 20px;
+  }
+
+  /* No keyboard on phones. */
+  .colorword-choice kbd {
+    display: none;
+  }
+}

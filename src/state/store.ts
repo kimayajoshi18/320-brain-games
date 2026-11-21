@@ -1,4 +1,4 @@
-import { GAME_IDS, type GameId } from '../data/games.ts'
+import { dailyGames, GAME_IDS, type GameId } from '../data/games.ts'
 import { struggleScore } from '../data/survey.ts'
 import { addDays, weekdayIndex, type DayKey } from '../lib/date.ts'
 import type { AppState, GameResult, Onboarding, PlayTime, Profile } from './types.ts'
@@ -23,20 +23,21 @@ export function createGuestState(today: DayKey): AppState {
     todayResults: {},
     completedDays: [],
     bestStreak: 0,
-    topScores: { memory: [], numbers: [], colors: [] },
+    topScores: { memory: [], numbers: [], colors: [], colorword: [] },
     gamesPlayed: 0,
     lastResult: null,
   }
 }
 
-/** Moves the state onto a new calendar day, clearing yesterday's three. */
+/** Moves the state onto a new calendar day, clearing yesterday's games. */
 export function rollToDay(state: AppState, today: DayKey): AppState {
   if (state.today === today) return state
   return { ...state, today, todayResults: {} }
 }
 
 export function recordResult(state: AppState, result: GameResult): AppState {
-  const daily = !state.todayResults[result.gameId]
+  // A game counts toward the day the first time it is played, if it's one of that day's games.
+  const daily = !state.todayResults[result.gameId] && dailyGames(state.today).includes(result.gameId)
   const previous = state.topScores[result.gameId]
   const newBest = previous.length === 0 || result.points > previous[0].points
   const topScores = {
@@ -47,7 +48,7 @@ export function recordResult(state: AppState, result: GameResult): AppState {
   let { todayResults, completedDays, bestStreak } = state
   if (daily) {
     todayResults = { ...todayResults, [result.gameId]: result }
-    const allDone = GAME_IDS.every((id) => todayResults[id])
+    const allDone = dailyGames(state.today).every((id) => todayResults[id])
     if (allDone && !completedDays.includes(state.today)) {
       completedDays = [...completedDays, state.today]
       bestStreak = Math.max(bestStreak, streakEndingAt(completedDays, state.today))
@@ -136,11 +137,12 @@ export function currentStreak(state: AppState): number {
   return streakEndingAt(state.completedDays, end)
 }
 
-/** Today's three in play order: the focus areas first, then the rest, most struggled-with first (ties keep the default order). */
+/** Today's games in play order: the focus areas first, then the rest, most struggled-with first (ties keep the default order). */
 export function dailyOrder(state: AppState): GameId[] {
-  const focus = GAME_IDS.filter((id) => state.onboarding.focus.includes(id))
+  const games = dailyGames(state.today)
+  const focus = games.filter((id) => state.onboarding.focus.includes(id))
   const answers = state.onboarding.answers ?? {}
-  const rest = GAME_IDS.filter((id) => !focus.includes(id))
+  const rest = games.filter((id) => !focus.includes(id))
   return [...focus, ...rest.sort((a, b) => struggleScore(answers, b) - struggleScore(answers, a))]
 }
 
@@ -149,10 +151,15 @@ export function nextDailyGame(state: AppState): GameId | null {
 }
 
 export function dailyDoneCount(state: AppState): number {
-  return GAME_IDS.filter((id) => state.todayResults[id]).length
+  return dailyGames(state.today).filter((id) => state.todayResults[id]).length
 }
 
-/** Monday-to-Sunday cells for the current week; true when that day's three were finished. */
+/** How many games make up today's set. */
+export function dailyCount(state: AppState): number {
+  return dailyGames(state.today).length
+}
+
+/** Monday-to-Sunday cells for the current week; true when that day's games were all finished. */
 export function weekCells(state: AppState): boolean[] {
   const monday = addDays(state.today, -weekdayIndex(state.today))
   const set = new Set(state.completedDays)
