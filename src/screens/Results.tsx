@@ -4,7 +4,7 @@ import TaskHeader from '../components/TaskHeader.tsx'
 import { GAMES } from '../data/games.ts'
 import { formatNumber, plural } from '../lib/format.ts'
 import { useAppState } from '../state/context.ts'
-import { currentStreak, dailyDoneCount, nextDailyGame } from '../state/store.ts'
+import { currentStreak, dailyCount, dailyDoneCount, nextDailyGame } from '../state/store.ts'
 import type { GameResult } from '../state/types.ts'
 import './Results.css'
 
@@ -22,8 +22,9 @@ export default function Results() {
   const { result, newBest, daily } = last
   const game = GAMES[result.gameId]
   const done = dailyDoneCount(state)
+  const total = dailyCount(state)
   const next = nextDailyGame(state)
-  const finishedToday = daily && done === 3 && state.completedDays.includes(state.today)
+  const finishedToday = daily && done === total && state.completedDays.includes(state.today)
   const top = state.topScores[result.gameId]
   const signedIn = state.account.kind === 'google'
 
@@ -51,7 +52,7 @@ export default function Results() {
           </Link>
         }
         title={`${game.name} · done`}
-        right={<span className="long">{daily ? `${done} of 3 today` : 'Practice'}</span>}
+        right={<span className="long">{daily ? `${done} of ${total} today` : 'Practice'}</span>}
       />
 
       <main className="results-body">
@@ -72,7 +73,7 @@ export default function Results() {
             <div className="panel panel-accent results-streak" role="status">
               <strong>+1</strong>
               <span>
-                All three done. Your streak is now <b>{plural(currentStreak(state), 'day')}</b>.
+                All {total} done. Your streak is now <b>{plural(currentStreak(state), 'day')}</b>.
               </span>
             </div>
           )}

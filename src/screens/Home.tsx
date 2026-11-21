@@ -5,7 +5,7 @@ import WeekBar from '../components/WeekBar.tsx'
 import { GAMES, type GameId } from '../data/games.ts'
 import { formatNumber, plural } from '../lib/format.ts'
 import { useAppState } from '../state/context.ts'
-import { currentStreak, dailyDoneCount, dailyOrder, nextDailyGame, weekCells } from '../state/store.ts'
+import { currentStreak, dailyCount, dailyDoneCount, dailyOrder, nextDailyGame, weekCells } from '../state/store.ts'
 import './Home.css'
 
 export default function Home() {
@@ -15,6 +15,7 @@ export default function Home() {
   const order = dailyOrder(state)
   const next = nextDailyGame(state)
   const done = dailyDoneCount(state)
+  const total = dailyCount(state)
   const streak = currentStreak(state)
   const week = weekCells(state)
   const upcoming = order.filter((id) => !state.todayResults[id] && id !== next)
@@ -32,7 +33,7 @@ export default function Home() {
         <section className="home-main" aria-labelledby="today-title">
           <h1 id="today-title" className="home-title">
             <span className="desktop-only">Today: </span>
-            {done === 3 ? 'All 3 done' : `${done} of 3 done`}
+            {done === total ? `All ${total} done` : `${done} of ${total} done`}
           </h1>
           <WeekBar days={week} className="home-week" />
 
@@ -70,9 +71,9 @@ export default function Home() {
             })}
           </ol>
 
-          {done === 3 && (
+          {done === total && (
             <p className="all-done">
-              That's today's three. Your streak is now <b>{plural(streak, 'day')}</b>. See you tomorrow!
+              That's all of today's games. Your streak is now <b>{plural(streak, 'day')}</b>. See you tomorrow!
             </p>
           )}
 
@@ -90,7 +91,7 @@ export default function Home() {
           <span className="streak-number">{streak}</span>
           <span className="streak-label">day streak</span>
           <WeekBar days={week} />
-          <span className="streak-hint">Finish all 3 to add a day</span>
+          <span className="streak-hint">Finish all {total} to add a day</span>
         </aside>
       </div>
     </MainShell>

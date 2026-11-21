@@ -37,7 +37,8 @@
 
 .daily-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* One column per daily game (see dailyGames in data/games.ts). */
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   margin: 0;
   padding: 0;

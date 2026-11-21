@@ -19,11 +19,11 @@ export type SurveyQuestion = { id: string; title: string; hint?: string; optiona
 /** Answers to the choice questions, by question id. The games question is kept in Onboarding.focus. */
 export type SurveyAnswers = Record<string, string[]>
 
-const frequency = (game: GameId): SurveyOption[] =>
+const frequency = (...games: GameId[]): SurveyOption[] =>
   ['Rarely', 'Sometimes', 'Often', 'Almost every day'].map((label, weight) => ({
     id: label.toLowerCase().replace(/ /g, '-'),
     label,
-    weights: { [game]: weight },
+    weights: Object.fromEntries(games.map((game) => [game, weight])),
   }))
 
 /** The login survey, in order. Add or edit a question here and the screen follows. */
@@ -33,7 +33,7 @@ export const SURVEY: SurveyQuestion[] = [
     kind: 'games',
     multiple: true,
     title: 'What do you want to train?',
-    hint: "Pick any. We'll put these first in your daily three.",
+    hint: "Pick any. We'll put these first in your daily games.",
   },
   {
     id: 'forget',
@@ -45,7 +45,7 @@ export const SURVEY: SurveyQuestion[] = [
     id: 'attention',
     kind: 'choice',
     title: 'How often do you lose focus on what you are doing?',
-    options: frequency('colors'),
+    options: frequency('colors', 'colorword'),
   },
   {
     id: 'numbers',
@@ -104,7 +104,7 @@ export function firstPicked(question: SurveyQuestion, answers: SurveyAnswers): s
   return question.options.find((o) => answers[question.id]?.includes(o.id))?.id ?? null
 }
 
-/** How much the answers say the player struggles with a game. Higher means a better fit for the daily three. */
+/** How much the answers say the player struggles with a game. Higher means it goes earlier in the daily games. */
 export function struggleScore(answers: SurveyAnswers, game: GameId): number {
   let total = 0
   for (const q of SURVEY) {

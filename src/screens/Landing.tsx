@@ -36,7 +36,7 @@ export default function Landing() {
             <GameArt key={id} game={id} />
           ))}
         </div>
-        <h1 className="landing-title">Train your brain. Three games a day.</h1>
+        <h1 className="landing-title">Train your brain. Four games a day.</h1>
         <p className="landing-sub">Free. No ads. No sign-up needed. Works offline.</p>
         <div className="landing-actions">
           <button type="button" className="btn btn-primary" onClick={() => navigate('/onboarding')}>

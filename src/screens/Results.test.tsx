@@ -33,7 +33,7 @@ describe('Results', () => {
 
     expect(screen.getByRole('heading', { name: '930 points' })).toBeInTheDocument()
     expect(screen.getByText('New personal best')).toBeInTheDocument()
-    expect(screen.getByText('1 of 3 today')).toBeInTheDocument()
+    expect(screen.getByText('1 of 4 today')).toBeInTheDocument()
     expect(screen.getAllByText('5/5 found').length).toBeGreaterThan(0)
   })
 
@@ -45,13 +45,13 @@ describe('Results', () => {
     expect(screen.getByText('Play screen')).toBeInTheDocument()
   })
 
-  it('shows the streak and a way back home once all three games are done', async () => {
+  it('shows the streak and a way back home once all the daily games are done', async () => {
     const user = userEvent.setup()
     let state = createGuestState(TODAY)
     for (const id of GAME_IDS) state = recordResult(state, makeResult(id))
     renderResults(state)
 
-    expect(screen.getByText(/All three done/)).toHaveTextContent('Your streak is now 1 day.')
+    expect(screen.getByText(/All 4 done/)).toHaveTextContent('Your streak is now 1 day.')
     expect(screen.queryByRole('button', { name: 'Next game' })).not.toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Back to today' }))

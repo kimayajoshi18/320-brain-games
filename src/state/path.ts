@@ -41,7 +41,7 @@ const STEPS_BEFORE_TODAY = 4
 const STEPS_AFTER_TODAY = 3
 const MIN_STEPS = 8
 
-/** Each finished daily three moves the player one step along the path. */
+/** Each finished day of games moves the player one step along the path. */
 export function buildPath(state: AppState): LearningPath {
   const finished = state.completedDays.length
   const todayDone = state.completedDays.includes(state.today)
@@ -51,7 +51,7 @@ export function buildPath(state: AppState): LearningPath {
   const first = Math.max(1, currentDay - STEPS_BEFORE_TODAY)
   const last = Math.max(currentDay + STEPS_AFTER_TODAY, first + MIN_STEPS - 1, nextReward?.day ?? 0)
 
-  // Non-reward days are labelled with a featured game, cycling through all three.
+  // Non-reward days are labelled with a featured game, cycling through every game.
   let gameIndex = 0
   const steps: PathStep[] = []
   for (let day = 1; day <= last; day++) {
@@ -64,7 +64,7 @@ export function buildPath(state: AppState): LearningPath {
       shortLabel = `${reward.day}-day · ${reward.tier}`
     } else {
       const game = GAMES[GAME_IDS[gameIndex++ % GAME_IDS.length]]
-      label = status === 'today' ? `Day ${day} · Today’s three` : status === 'done' ? `Day ${day} · ${game.name}` : `Day ${day}`
+      label = status === 'today' ? `Day ${day} · Today’s games` : status === 'done' ? `Day ${day} · ${game.name}` : `Day ${day}`
       shortLabel = label
     }
     if (day >= first) steps.push({ day, status, reward, label, shortLabel })

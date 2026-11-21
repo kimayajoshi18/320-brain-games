@@ -1,6 +1,6 @@
 const DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
-/** Seven cells for this week, filled for each day the daily three were finished. */
+/** Seven cells for this week, filled for each day all the daily games were finished. */
 export default function WeekBar({ days, className }: { days: boolean[]; className?: string }) {
   return (
     <div className={['week-bar', className].filter(Boolean).join(' ')} role="list" aria-label="This week">
