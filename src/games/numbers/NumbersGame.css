@@ -1,0 +1,77 @@
+/* ---------- Number Grid ---------- */
+
+.numbers-grid {
+  display: grid;
+  flex: 1;
+  grid-template-columns: repeat(var(--size), minmax(0, 72px));
+  gap: 6px;
+  justify-content: center;
+  align-content: center;
+}
+
+.numbers-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+.numbers-cell.given,
+.numbers-cell.blank {
+  border: var(--rule-thin);
+}
+
+.numbers-cell.blank {
+  /* Inputs have their own width and font; make them fill the cell like the others. */
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border-radius: 0;
+  font-family: inherit;
+  text-align: center;
+  background: transparent;
+  color: var(--red-text);
+  /* .game turns text selection off, which stops typing in inputs on iOS Safari. */
+  user-select: text;
+  -webkit-user-select: text;
+}
+
+.numbers-cell.block {
+  visibility: hidden;
+}
+
+.numbers-cell.solved {
+  color: var(--ink);
+}
+
+.numbers-cell.wrong {
+  border-color: var(--red);
+  animation: cell-shake 0.3s ease-in-out;
+}
+
+.numbers-cell.hinted {
+  outline: 3px dashed var(--ink);
+  outline-offset: 2px;
+  animation: hint-pulse 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes cell-shake {
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 600px) {
+  .numbers-grid {
+    grid-template-columns: repeat(var(--size), minmax(0, 56px));
+    gap: 4px;
+  }
+
+  .numbers-cell {
+    font-size: 22px;
+  }
+}
