@@ -2,61 +2,20 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 import TaskHeader from '../../components/TaskHeader.tsx'
 import { formatDuration, plural } from '../../lib/format.ts'
-import { createRandom } from '../../lib/random.ts'
+import { memoryPoints, unfinishedPoints } from '../../lib/scoring.ts'
 import { useAppState } from '../../state/context.ts'
 import type { GameResult } from '../../state/types.ts'
 import ExitLink from '../ExitLink.tsx'
 import GameTimer from '../GameTimer.tsx'
 import { gameHeading } from '../heading.ts'
+import { columnsForCount, createDeck, deckSeed, LAST_ROUND, TIME_LIMIT, TOTAL_PAIRS, type Card } from './deck.ts'
 import '../game.css'
 import './MemoryGame.css'
 
-const SYMBOLS = ['★', '♦', '♣', '♠', '♥', '▲', '●', '■']
-const TIME_LIMIT = 120
-
-const ROUND_CONFIG: Record<number, number> = {
-  1: 4,
-  2: 6,
-  3: 8,
-  4: 12,
-  5: 16,
-}
-
-function cardCountForRound(round: number): number {
-  if (round <= 5) return ROUND_CONFIG[round]
-  return 16
-}
-
-function columnsForCount(count: number): number {
-  if (count <= 4) return 2
-  if (count <= 6) return 3
-  return 4
-}
-
-interface Card {
-  id: number
-  symbol: string
-}
-
-function createDeck(round: number, seed: string): Card[] {
-  const count = cardCountForRound(round)
-  const pairs = count / 2
-  const rand = createRandom(seed)
-  const shuffled = rand.shuffle(SYMBOLS)
-  const chosen = shuffled.slice(0, pairs)
-  const cards: Card[] = chosen.flatMap((symbol, i) => [
-    { id: i * 2, symbol },
-    { id: i * 2 + 1, symbol },
-  ])
-  return rand.shuffle(cards)
-}
-
-function scoreForGame(totalMoves: number, totalSeconds: number, finalRound: number): number {
-  const base = finalRound * 200
-  const moveBonus = Math.max(0, 300 - totalMoves * 8)
-  const timeBonus = Math.max(0, 500 - totalSeconds * 3)
-  return base + moveBonus + timeBonus
-}
+/** How long a pair that doesn't match stays face up. */
+export const MISMATCH_MS = 900
+/** How long the "Round complete" message shows before the next round (or the results). */
+export const ROUND_PAUSE_MS = 1800
 
 export default function MemoryGame() {
   const { state, actions } = useAppState()
@@ -64,13 +23,15 @@ export default function MemoryGame() {
   const [heading] = useState(() => gameHeading(state, 'memory'))
 
   const [round, setRound] = useState(1)
-  const [deck, setDeck] = useState<Card[]>(() =>
-    createDeck(1, `memory:${state.today}:${state.gamesPlayed}:1`),
-  )
+  const [deck, setDeck] = useState<Card[]>(() => createDeck(1, deckSeed(state.today, state.gamesPlayed, 1)))
   const [flipped, setFlipped] = useState<number[]>([])
   const [matched, setMatched] = useState<Set<number>>(new Set())
   const [moves, setMoves] = useState(0)
   const [totalMoves, setTotalMoves] = useState(0)
+  /** Turns where the two cards didn't match, across every round. */
+  const [wrongPairs, setWrongPairs] = useState(0)
+  /** Pairs matched across every round. */
+  const [pairsFound, setPairsFound] = useState(0)
   const [locked, setLocked] = useState(false)
   const [roundComplete, setRoundComplete] = useState(false)
   const [gameOver, setGameOver] = useState(false)
@@ -79,8 +40,14 @@ export default function MemoryGame() {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const mismatchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
   const roundTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const startTime = useRef(performance.now())
+  const startTime = useRef(0)
   const gameOverRef = useRef(false)
+
+  // The clock and the round timeout read these, so they always see the latest values.
+  const progress = useRef({ round, totalMoves, wrongPairs, pairsFound })
+  useEffect(() => {
+    progress.current = { round, totalMoves, wrongPairs, pairsFound }
+  }, [round, totalMoves, wrongPairs, pairsFound])
 
   const clearPendingTimeouts = useCallback(() => {
     if (mismatchTimeout.current) {
@@ -93,34 +60,32 @@ export default function MemoryGame() {
     }
   }, [])
 
-  useEffect(() => {
-    return () => clearPendingTimeouts()
-  }, [clearPendingTimeouts])
+  useEffect(() => () => clearPendingTimeouts(), [clearPendingTimeouts])
 
-  const roundRef = useRef(round)
-  roundRef.current = round
-  const totalMovesRef = useRef(totalMoves)
-  totalMovesRef.current = totalMoves
-
+  /** Saves the game and shows the results. `completed` is false when time ran out. */
   const finishGame = useCallback(
-    (finalRound: number, allMoves: number) => {
+    (completed: boolean) => {
       if (gameOverRef.current) return
       gameOverRef.current = true
       setGameOver(true)
       if (timerRef.current) clearInterval(timerRef.current)
       clearPendingTimeouts()
-      const seconds = Math.round((performance.now() - startTime.current) / 1000)
-      const points = scoreForGame(allMoves, seconds, finalRound)
+
+      const { round: finalRound, totalMoves: allMoves, wrongPairs: misses, pairsFound: found } = progress.current
+      const seconds = Math.min(TIME_LIMIT, Math.round((performance.now() - startTime.current) / 1000))
+      const roundsCleared = completed ? LAST_ROUND : finalRound - 1
       const result: GameResult = {
         gameId: 'memory',
-        points,
+        points: completed ? memoryPoints({ seconds, wrongPairs: misses }) : unfinishedPoints(found / TOTAL_PAIRS),
         durationSec: seconds,
         stats: [
+          completed ? 'All rounds cleared' : `Reached round ${finalRound}`,
           plural(allMoves, 'move'),
           formatDuration(seconds),
-          `Round ${finalRound}`,
+          misses > 0 ? plural(misses, 'missed pair') : 'No misses',
         ],
         highlight: `Round ${finalRound}`,
+        details: { moves: allMoves, wrongPairs: misses, pairs: found, rounds: roundsCleared },
         playedAt: state.today,
       }
       actions.recordResult(result)
@@ -130,31 +95,32 @@ export default function MemoryGame() {
   )
 
   const finishGameRef = useRef(finishGame)
-  finishGameRef.current = finishGame
-
   useEffect(() => {
+    finishGameRef.current = finishGame
+  }, [finishGame])
+
+  const startClock = useCallback(() => {
+    if (timerRef.current) clearInterval(timerRef.current)
     startTime.current = performance.now()
     timerRef.current = setInterval(() => {
       const now = (performance.now() - startTime.current) / 1000
-      setElapsed(now)
-      if (now >= TIME_LIMIT) {
-        finishGameRef.current(roundRef.current, totalMovesRef.current)
-      }
+      setElapsed(Math.min(now, TIME_LIMIT))
+      if (now >= TIME_LIMIT) finishGameRef.current(false)
     }, 250)
+  }, [])
+
+  useEffect(() => {
+    startClock()
     return () => {
       if (timerRef.current) clearInterval(timerRef.current)
     }
-  }, [])
+  }, [startClock])
 
   const startNextRound = useCallback(
     (nextRound: number) => {
       clearPendingTimeouts()
-      const newDeck = createDeck(
-        nextRound,
-        `memory:${state.today}:${state.gamesPlayed}:${nextRound}`,
-      )
       setRound(nextRound)
-      setDeck(newDeck)
+      setDeck(createDeck(nextRound, deckSeed(state.today, state.gamesPlayed, nextRound)))
       setFlipped([])
       setMatched(new Set())
       setMoves(0)
@@ -164,93 +130,60 @@ export default function MemoryGame() {
     [state.today, state.gamesPlayed, clearPendingTimeouts],
   )
 
-  const handleCardClick = useCallback(
-    (cardIndex: number) => {
-      if (locked || gameOver || roundComplete) return
-      if (flipped.includes(cardIndex)) return
-      if (matched.has(cardIndex)) return
+  const handleCardClick = (cardIndex: number) => {
+    if (locked || gameOver || roundComplete) return
+    if (flipped.includes(cardIndex) || matched.has(cardIndex)) return
 
-      const newFlipped = [...flipped, cardIndex]
-      setFlipped(newFlipped)
+    const newFlipped = [...flipped, cardIndex]
+    setFlipped(newFlipped)
+    if (newFlipped.length < 2) return
 
-      if (newFlipped.length === 2) {
-        const newMoves = moves + 1
-        const newTotalMoves = totalMoves + 1
-        setMoves(newMoves)
-        setTotalMoves(newTotalMoves)
+    setMoves((m) => m + 1)
+    setTotalMoves((m) => m + 1)
 
-        const [first, second] = newFlipped
-        if (deck[first].symbol === deck[second].symbol) {
-          const newMatched = new Set(matched)
-          newMatched.add(first)
-          newMatched.add(second)
-          setMatched(newMatched)
-          setFlipped([])
+    const [first, second] = newFlipped
+    if (deck[first].symbol !== deck[second].symbol) {
+      setWrongPairs((w) => w + 1)
+      setLocked(true)
+      mismatchTimeout.current = setTimeout(() => {
+        setFlipped([])
+        setLocked(false)
+      }, MISMATCH_MS)
+      return
+    }
 
-          if (newMatched.size === deck.length) {
-            setRoundComplete(true)
-            setLocked(true)
+    const newMatched = new Set(matched).add(first).add(second)
+    setMatched(newMatched)
+    setPairsFound((p) => p + 1)
+    setFlipped([])
 
-            const maxRound = 5
-            if (round >= maxRound && cardCountForRound(round) === 16) {
-              roundTimeout.current = setTimeout(() => {
-                finishGame(round, newTotalMoves)
-              }, 1800)
-            } else {
-              roundTimeout.current = setTimeout(() => {
-                startNextRound(round + 1)
-              }, 1800)
-            }
-          }
-        } else {
-          setLocked(true)
-          mismatchTimeout.current = setTimeout(() => {
-            setFlipped([])
-            setLocked(false)
-          }, 900)
-        }
-      }
-    },
-    [
-      locked,
-      gameOver,
-      roundComplete,
-      flipped,
-      matched,
-      moves,
-      totalMoves,
-      deck,
-      round,
-      startNextRound,
-      finishGame,
-    ],
-  )
+    if (newMatched.size === deck.length) {
+      setRoundComplete(true)
+      setLocked(true)
+      roundTimeout.current = setTimeout(
+        () => (round >= LAST_ROUND ? finishGame(true) : startNextRound(round + 1)),
+        ROUND_PAUSE_MS,
+      )
+    }
+  }
 
-  const restartGame = useCallback(() => {
+  const restartGame = () => {
     clearPendingTimeouts()
-    if (timerRef.current) clearInterval(timerRef.current)
     gameOverRef.current = false
     setGameOver(false)
     setRound(1)
-    setDeck(
-      createDeck(1, `memory:${state.today}:${state.gamesPlayed}:restart:${Date.now()}`),
-    )
+    setDeck(createDeck(1, `${deckSeed(state.today, state.gamesPlayed, 1)}:restart:${Date.now()}`))
     setFlipped([])
     setMatched(new Set())
     setMoves(0)
     setTotalMoves(0)
+    setWrongPairs(0)
+    setPairsFound(0)
     setLocked(false)
     setRoundComplete(false)
     setElapsed(0)
-    startTime.current = performance.now()
-    timerRef.current = setInterval(() => {
-      const now = (performance.now() - startTime.current) / 1000
-      setElapsed(now)
-      if (now >= TIME_LIMIT) {
-        finishGameRef.current(roundRef.current, totalMovesRef.current)
-      }
-    }, 250)
-  }, [state.today, state.gamesPlayed, clearPendingTimeouts])
+    startClock()
+  }
 
   const pairs = deck.length / 2
   const matchedPairs = matched.size / 2
@@ -271,27 +204,20 @@ export default function MemoryGame() {
 
       <main className="game-body">
         <div className="memory-stats">
-          <span>Round {round}</span>
-          <span>{moves} moves</span>
+          <span>
+            Round {round} of {LAST_ROUND}
+          </span>
+          <span>{plural(moves, 'move')}</span>
           <span>
             {matchedPairs}/{pairs} matched
           </span>
         </div>
 
-        <div
-          className="memory-board"
-          data-cols={cols}
-          role="grid"
-          aria-label="Memory card grid"
-        >
+        <div className="memory-board" data-cols={cols} role="grid" aria-label="Memory card grid">
           {deck.map((card, index) => {
             const isFlipped = flipped.includes(index)
             const isMatched = matched.has(index)
-            const className = [
-              'memory-card',
-              isFlipped ? 'flipped' : '',
-              isMatched ? 'matched' : '',
-            ]
+            const className = ['memory-card', isFlipped ? 'flipped' : '', isMatched ? 'matched' : '']
               .filter(Boolean)
               .join(' ')
 
@@ -302,11 +228,7 @@ export default function MemoryGame() {
                 className={className}
                 onClick={() => handleCardClick(index)}
                 disabled={isMatched}
-                aria-label={
-                  isFlipped || isMatched
-                    ? `Card: ${card.symbol}`
-                    : 'Face-down card'
-                }
+                aria-label={isFlipped || isMatched ? `Card: ${card.symbol}` : 'Face-down card'}
               >
                 <div className="memory-card-inner">
                   <div className="memory-card-face memory-card-back" aria-hidden="true" />
@@ -320,20 +242,16 @@ export default function MemoryGame() {
         </div>
 
         <div className="memory-footer">
-          <button
-            type="button"
-            className="btn btn-outline btn-sm"
-            onClick={restartGame}
-          >
+          <button type="button" className="btn btn-outline btn-sm" onClick={restartGame}>
             Restart Game
           </button>
         </div>
 
         {roundComplete && !gameOver && (
-          <div className="memory-overlay" aria-live="polite">
-            <h2>Round Complete!</h2>
+          <div className="memory-overlay" role="status" aria-live="polite">
+            <h2>{round >= LAST_ROUND ? 'All rounds cleared!' : 'Round Complete!'}</h2>
             <p>
-              {moves} moves &middot; Starting round {round + 1}...
+              {plural(moves, 'move')} &middot; {round >= LAST_ROUND ? 'Saving your score...' : `Starting round ${round + 1}...`}
             </p>
           </div>
         )}
