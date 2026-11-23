@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Lint currently fails on main. Remove continue-on-error once PR #17 is merged.
+      - run: npm run lint
+        continue-on-error: true
+      - run: npx tsc -b
+      - run: npm run test:run
+      - run: npm run build
