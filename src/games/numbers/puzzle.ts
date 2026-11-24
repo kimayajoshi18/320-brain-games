@@ -3,7 +3,7 @@ import {createRandom} from '../../lib/random.ts'
 export type Op = "+" | "-" | "*" | "/"
 export type Cell = 
     | {kind: 'number', answer: number; given: boolean}
-    | {kind: Op, op: Op}
+    | {kind: 'op'; op: Op}
     | {kind: 'equals'}
     | {kind: 'block'}
 

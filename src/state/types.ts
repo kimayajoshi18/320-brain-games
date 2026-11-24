@@ -16,6 +16,7 @@ export interface GameResult {
   /**
    * Game-specific numbers kept for history, saved in game_sessions.details next to `stats` and
    * `highlight`. Color & Word: correct, wrong, rounds, avgResponseMs.
+   * Numbers: blanks, wrongEntries, hints.
    */
   details?: Record<string, number>
   /** Hints used and the seconds they added to the time. The points already include the penalty. */

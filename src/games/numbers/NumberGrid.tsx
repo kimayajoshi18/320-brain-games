@@ -22,9 +22,9 @@ export default function NumberGrid({ puzzle, drafts, solved, hinted, wrong, inpu
          role="group" aria-label="Number crossword">
             {puzzle.cells.map((cell, i) => {
                 if (cell.kind === 'block') return <div key={i} className="numbers-cell block" />
-                if (cell.kind === 'op') return <div key={i} className="numbers-cell symbol">{cell.op}</div>
-                if (cell.kind === 'equals') return <div key={i} className="numbers-cell symbol">=</div>
-                if (cell.given) return <div key={i} className="numbers-cell given">{cell.answer}</div>
+                if (cell.kind === 'op') return <div key={i} className={classes(i, 'symbol')}>{OP_LABEL[cell.op]}</div>
+                if (cell.kind === 'equals') return <div key={i} className={classes(i, 'symbol')}>=</div>
+                if (cell.given) return <div key={i} className={classes(i, 'given')}>{cell.answer}</div>
                 const isSolved = solved.includes(i)
                 return (
                 <input
@@ -51,7 +51,3 @@ export default function NumberGrid({ puzzle, drafts, solved, hinted, wrong, inpu
     </div>
   )
 }
-                
-/**const isHinted = hinted !== null && [hinted.left, hinted.right, hinted.result].includes(i)
-                const className = ['numbers-cell', 'blank', isSolved && 'solved', wrong === i && 'wrong', isHinted && 'hinted']
-                .filter(Boolean).join(' ')*/

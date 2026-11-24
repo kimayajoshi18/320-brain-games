@@ -64,6 +64,7 @@ export default function NumbersGame() {
         hintPenalty: hints * HINT_PENALTY_SECONDS,
         stats,
         highlight: formatDuration(seconds),
+        details: { blanks: BLANK_COUNT, wrongEntries, hints },
         playedAt: state.today,
       })
       navigate('/results')
