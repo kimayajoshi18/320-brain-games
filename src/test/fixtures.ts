@@ -3,7 +3,7 @@ import type { GameId } from '../data/games.ts'
 import { createGuestState } from '../state/store.ts'
 import type { AppState, GameResult } from '../state/types.ts'
 
-export const TODAY = '2026-11-02'
+export const TODAY = '2026-11-23'
 
 export const makeResult = (gameId: GameId, points = 930, overrides: Partial<GameResult> = {}): GameResult => ({
   gameId,

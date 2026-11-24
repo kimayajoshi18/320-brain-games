@@ -5,7 +5,7 @@ import './layout.css'
 interface TaskHeaderProps {
   /** Close/exit control on the left. */
   left: ReactNode
-  /** Title, e.g. "Game 3 of 3 · Spot The Difference". */
+  /** Title, e.g. "Game 3 of 4 · Spot The Difference". */
   title: ReactNode
   /** Status on the right, e.g. the timer. */
   right?: ReactNode

@@ -13,6 +13,11 @@ export interface GameResult {
   /** How this result reads in the high-score table, e.g. "1,240", "2:04" or "5/5". */
   highlight: string
   playedAt: DayKey
+  /**
+   * Game-specific numbers kept for history, saved in game_sessions.details next to `stats` and
+   * `highlight`. Color & Word: correct, wrong, rounds, avgResponseMs.
+   */
+  details?: Record<string, number>
   /** Hints used and the seconds they added to the time. The points already include the penalty. */
   hintsUsed?: number
   hintPenalty?: number
@@ -24,7 +29,7 @@ export interface GameResult {
 
 export interface Onboarding {
   complete: boolean
-  /** Games the player wants to work on; these go first in the daily three. */
+  /** Games the player wants to work on; these go first in the daily games. */
   focus: GameId[]
   when: PlayTime | null
   /** Answers to the other survey questions (see data/survey.ts). */
@@ -42,7 +47,7 @@ export type Account = { kind: 'guest' } | { kind: 'google'; profile: Profile; /*
 export interface LastResult {
   result: GameResult
   newBest: boolean
-  /** True when this play counted toward today's three (first play of the day). */
+  /** True when this play counted toward today's games (first play of the day). */
   daily: boolean
 }
 
@@ -51,9 +56,9 @@ export interface AppState {
   onboarding: Onboarding
   /** The calendar day the `todayResults` belong to. */
   today: DayKey
-  /** Daily-three results for `today`; only the first play of each game counts. */
+  /** Daily results for `today`; only the first play of each game counts. */
   todayResults: Partial<Record<GameId, GameResult>>
-  /** Every day the player finished all three games. Drives the streak and learning path. */
+  /** Every day the player finished all the daily games. Drives the streak and learning path. */
   completedDays: DayKey[]
   bestStreak: number
   /** Up to three highest-scoring results per game. */

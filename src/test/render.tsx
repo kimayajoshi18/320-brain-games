@@ -10,7 +10,7 @@ import type { AppState } from '../state/types.ts'
 
 export function renderWithApp(
     ui: ReactElement,
-    {state = createGuestState('2026-11-02'), route ='/',}: {state?:AppState; route?: string} ={}
+    {state = createGuestState('2026-11-23'), route ='/',}: {state?:AppState; route?: string} ={}
 ){
     const mockActions: AppActions = {
         completeOnboarding: vi.fn(),

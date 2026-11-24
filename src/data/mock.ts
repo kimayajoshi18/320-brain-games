@@ -32,6 +32,15 @@ export function createDemoAccount(today: DayKey): AppState {
     playedAt: addDays(today, -daysAgo),
   })
 
+  const colorword = (points: number, daysAgo: number, correct: number, time: number): GameResult => ({
+    gameId: 'colorword',
+    points,
+    durationSec: time,
+    stats: [`${correct} of 20 correct`, formatDuration(time)],
+    highlight: `${correct}/20`,
+    playedAt: addDays(today, -daysAgo),
+  })
+
   const todaysMemory = memory(1240, 0, 14, 52, 86)
 
   return {
@@ -49,6 +58,7 @@ export function createDemoAccount(today: DayKey): AppState {
       memory: [todaysMemory, memory(1105, 3, 16, 58, 81), memory(980, 9, 19, 59, 74)],
       numbers: [numbers(1150, 2, 124), numbers(1020, 6, 141), numbers(940, 11, 156)],
       colors: [colors(1080, 1, 5, 44), colors(990, 5, 5, 51), colors(760, 8, 4, 60)],
+      colorword: [colorword(1110, 1, 20, 30), colorword(1020, 4, 19, 36), colorword(930, 7, 18, 41)],
     },
     gamesPlayed: 57,
     lastResult: null,

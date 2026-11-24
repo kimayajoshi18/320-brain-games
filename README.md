@@ -1,6 +1,6 @@
 # 320-brain-games
 
-Puzzlr is a browser app built from the "Puzzlr Wireframes" design: three short brain games a day, streaks, a learning path, friends and a profile. It works on desktop and phones.
+Puzzlr is a browser app built from the "Puzzlr Wireframes" design: four short brain games a day, streaks, a learning path, friends and a profile. It works on desktop and phones.
 
 Built with React, TypeScript, React Router and Vite.
 
@@ -56,4 +56,4 @@ state/        app state: types, pure store functions, React provider
 styles/       design tokens and shared button/panel styles
 ```
 
-Game rules live in `src/state/store.ts` as plain functions (no React), so they're easy to test or move to a server later: what counts toward the daily three, streaks, top scores, and merging guest progress on sign-in.
+Game rules live in `src/state/store.ts` as plain functions (no React), so they're easy to test or move to a server later: what counts toward the daily games, streaks, top scores, and merging guest progress on sign-in.

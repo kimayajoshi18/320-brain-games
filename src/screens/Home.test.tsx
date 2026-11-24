@@ -7,7 +7,7 @@ import Home from './Home.tsx'
 it('displays the guest progress and gives the user an option to sign in', async()=>{
     const user = userEvent.setup()
     const {actions} = renderWithApp(<Home />, {route: '/home'})
-    expect(screen.getByRole('heading', {level:1})).toHaveTextContent('0 of 3 done')
+    expect(screen.getByRole('heading', {level:1})).toHaveTextContent('0 of 4 done')
     await user.click(screen.getByRole('button', {name: 'Sign in to keep it'}))
     expect(actions.signIn).toHaveBeenCalledOnce()
 })

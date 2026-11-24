@@ -38,6 +38,15 @@
   --scene-ink: #111111;
   --scene-sky: #8fb8c9;
 
+  /* Color & Word: the four ink colors, the text drawn on them as buttons, and the card behind the word. */
+  --stroop-red: #d32f2f;
+  --stroop-blue: #1e63c4;
+  --stroop-green: #2e8b3e;
+  --stroop-yellow: #e2a900;
+  --on-stroop: #fff;
+  --on-stroop-yellow: #111;
+  --stroop-card: #fff;
+
   --rule: 4px solid var(--ink);
   --rule-thin: 3px solid var(--ink);
 
@@ -92,6 +101,14 @@
   --scene-purple: #9b7fd4;
   --scene-ink: #f2efe8;
   --scene-sky: #8ccbe8;
+
+  --stroop-red: #ef5350;
+  --stroop-blue: #5b9cf5;
+  --stroop-green: #4cbb63;
+  --stroop-yellow: #f2c94c;
+  --on-stroop: #111;
+  --on-stroop-yellow: #111;
+  --stroop-card: #1e1e1e;
 }
 
 *,

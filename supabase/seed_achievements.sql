@@ -17,11 +17,11 @@ begin
     insert into public.achievements (name, tier, description)
     select v.name, v.tier, v.description
       from (values
-        ('7-day streak', 'milestone', 'Finish the daily three 7 days in a row'),
+        ('7-day streak', 'milestone', 'Finish all the daily games 7 days in a row'),
         ('Memory gold', 'gold', 'Score 1,200 in Memory'),
         ('50 games', 'milestone', 'Play 50 games'),
         ('Number silver', 'silver', 'Score 1,100 in Numbers'),
-        ('30-day streak', 'milestone', 'Finish the daily three 30 days in a row'),
+        ('30-day streak', 'milestone', 'Finish all the daily games 30 days in a row'),
         ('Colors gold', 'gold', 'Score 1,200 in Colors')
       ) as v(name, tier, description)
     on conflict (name) do nothing;
@@ -30,11 +30,11 @@ begin
     select (select coalesce(max(id), 0) from public.achievements) + row_number() over (order by v.ord),
            v.name, v.tier, v.description
       from (values
-        (1, '7-day streak', 'milestone', 'Finish the daily three 7 days in a row'),
+        (1, '7-day streak', 'milestone', 'Finish all the daily games 7 days in a row'),
         (2, 'Memory gold', 'gold', 'Score 1,200 in Memory'),
         (3, '50 games', 'milestone', 'Play 50 games'),
         (4, 'Number silver', 'silver', 'Score 1,100 in Numbers'),
-        (5, '30-day streak', 'milestone', 'Finish the daily three 30 days in a row'),
+        (5, '30-day streak', 'milestone', 'Finish all the daily games 30 days in a row'),
         (6, 'Colors gold', 'gold', 'Score 1,200 in Colors')
       ) as v(ord, name, tier, description)
      where not exists (select 1 from public.achievements a where a.name = v.name)
