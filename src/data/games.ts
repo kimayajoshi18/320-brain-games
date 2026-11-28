@@ -30,7 +30,7 @@ export const GAMES: Record<GameId, GameInfo> = {
     name: 'Memory',
     title: 'Memory Match',
     trains: 'Remembering things',
-    why: 'Matching pairs trains short-term memory. (Placeholder: source needed.)',
+    why: 'Matching games give your memory a workout. A review of randomized trials found small gains in nonverbal memory after computerized training in healthy older adults, though the effect is modest. (Lampit et al., 2014, PLOS Medicine)',
     playable: true,
   },
   numbers: {
@@ -38,7 +38,7 @@ export const GAMES: Record<GameId, GameInfo> = {
     name: 'Numbers',
     title: 'Number Grid',
     trains: 'Thinking with numbers',
-    why: 'Number puzzles exercise working memory and logical reasoning. (Placeholder: source needed.)',
+    why: 'Number puzzles make you hold and update numbers in your head, which is a working memory skill.',
     playable: true,
   },
   colors: {

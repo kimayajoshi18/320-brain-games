@@ -34,7 +34,12 @@ export function memoryPoints({ seconds, wrongPairs = 0, hints = 0 }: Round & { w
   return points({ seconds, mistakes: wrongPairs, hints })
 }
 
-/** Number grid: every cell filled, wrong entries are the mistakes. */
+/** A game that ran out of time: a share of the finished points for the part that was done, and no speed points. */
+export function unfinishedPoints(fractionDone: number): number {
+  return Math.round(FINISHED_POINTS * Math.min(1, Math.max(0, fractionDone)))
+}
+
+/** Number grid:every cell filled, wrong entries are the mistakes. */
 export function numbersPoints({ seconds, wrongEntries = 0, hints = 0 }: Round & { wrongEntries?: number }): number {
   return points({ seconds, mistakes: wrongEntries, hints })
 }
