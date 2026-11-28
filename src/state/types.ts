@@ -15,7 +15,7 @@ export interface GameResult {
   playedAt: DayKey
   /**
    * Game-specific numbers kept for history, saved in game_sessions.details next to `stats` and
-   * `highlight`. Color & Word: correct, wrong, rounds, avgResponseMs.
+   * `highlight`. Color & Word: correct, wrong, rounds, avgResponseMs. Memory: moves, wrongPairs, pairs, rounds (cleared).
    */
   details?: Record<string, number>
   /** Hints used and the seconds they added to the time. The points already include the penalty. */
