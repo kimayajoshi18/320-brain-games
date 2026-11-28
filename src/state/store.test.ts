@@ -2,7 +2,7 @@
 //Testing streak and high score rules
 
 import { describe, expect, it } from 'vitest'
-import { COLORWORD_DAILY_FROM, GAME_IDS, type GameId } from '../data/games.ts'
+import { COLORWORD_DAILY_FROM, dailyGames, GAME_IDS, SYMBOLS_DAILY_FROM, type GameId } from '../data/games.ts'
 import { addDays } from '../lib/date.ts'
 import { createGuestState, currentStreak, dailyCount, dailyDoneCount, rebuildFromResults, recordResult } from './store.ts'
 import type { GameResult } from './types.ts'
@@ -24,7 +24,7 @@ describe('recordResults', ()=>{
 
     it('completes the day tracker once all the daily games have been played by the user', ()=>{
         let st = createGuestState(Today)
-        for (const id of GAME_IDS) st = recordResult(st, result(id))
+        for (const id of dailyGames(Today)) st = recordResult(st, result(id))
         expect(dailyDoneCount(st)).toBe(4)
         expect(st.completedDays).toEqual([Today])
         expect(currentStreak(st)).toBe(1)
@@ -32,9 +32,9 @@ describe('recordResults', ()=>{
 
     it('does not complete the day until every daily game is played', ()=>{
         let st = createGuestState(Today)
-        for (const id of GAME_IDS.slice(0, -1)) st = recordResult(st, result(id))
+        for (const id of dailyGames(Today).slice(0, -1)) st = recordResult(st, result(id))
         expect(st.completedDays).toEqual([])
-        st = recordResult(st, result(GAME_IDS[GAME_IDS.length - 1]))
+        st = recordResult(st, result(dailyGames(Today).at(-1)!))
         expect(st.completedDays).toEqual([Today])
     })
 
@@ -79,6 +79,39 @@ describe('adding Color & Word to the daily games', ()=>{
             ...play(COLORWORD_DAILY_FROM, GAME_IDS),
         ]
         const st = rebuildFromResults(createGuestState(COLORWORD_DAILY_FROM), results)
+        expect(currentStreak(st)).toBe(3)
+    })
+})
+
+describe('adding Symbol Recall to the daily games', ()=>{
+    const before = addDays(SYMBOLS_DAILY_FROM, -1)
+    const four: GameId[] = ['memory', 'numbers', 'colors', 'colorword']
+    const play = (day: string, ids: GameId[]) => ids.map((id) => ({ ...result(id), playedAt: day, finishedAt: `${day}T12:00:00.000Z` }))
+
+    it('finishes days before it joined with four games', ()=>{
+        let st = createGuestState(before)
+        expect(dailyCount(st)).toBe(4)
+        for (const id of four) st = recordResult(st, result(id))
+        expect(st.completedDays).toEqual([before])
+    })
+
+    it('needs all five games from the day it joined', ()=>{
+        let st = createGuestState(SYMBOLS_DAILY_FROM)
+        expect(dailyCount(st)).toBe(5)
+        for (const id of four) st = recordResult(st, result(id))
+        expect(st.completedDays).toEqual([])
+        st = recordResult(st, result('symbols'))
+        expect(dailyDoneCount(st)).toBe(5)
+        expect(st.completedDays).toEqual([SYMBOLS_DAILY_FROM])
+    })
+
+    it('keeps a streak running across the day it joined when history is reloaded', ()=>{
+        const results = [
+            ...play(addDays(before, -1), four),
+            ...play(before, four),
+            ...play(SYMBOLS_DAILY_FROM, GAME_IDS),
+        ]
+        const st = rebuildFromResults(createGuestState(SYMBOLS_DAILY_FROM), results)
         expect(currentStreak(st)).toBe(3)
     })
 })

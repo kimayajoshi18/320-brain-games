@@ -1,6 +1,6 @@
 # 320-brain-games
 
-Puzzlr is a browser app built from the "Puzzlr Wireframes" design: four short brain games a day, streaks, a learning path, friends and a profile. It works on desktop and phones.
+Puzzlr is a browser app built from the "Puzzlr Wireframes" design: five short brain games a day, streaks, a learning path, friends and a profile. It works on desktop and phones.
 
 Built with React, TypeScript, React Router and Vite.
 

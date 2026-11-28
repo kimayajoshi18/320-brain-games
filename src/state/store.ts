@@ -23,7 +23,7 @@ export function createGuestState(today: DayKey): AppState {
     todayResults: {},
     completedDays: [],
     bestStreak: 0,
-    topScores: { memory: [], numbers: [], colors: [], colorword: [] },
+    topScores: { memory: [], numbers: [], colors: [], colorword: [], symbols: [] },
     gamesPlayed: 0,
     lastResult: null,
   }

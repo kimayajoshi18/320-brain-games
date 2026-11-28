@@ -1,0 +1,227 @@
+/* ---------- Symbol Recall ---------- */
+
+.symbols {
+  align-items: center;
+}
+
+.symbols > * {
+  width: 100%;
+  max-width: 880px;
+}
+
+.symbols-status {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 20px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.symbols-progress {
+  flex: 1;
+  height: 14px;
+  background: var(--grey-3);
+}
+
+.symbols-progress span {
+  display: block;
+  height: 100%;
+  background: var(--red);
+  transition: width 0.2s ease-out;
+}
+
+.symbols-prompt {
+  font-size: 22px;
+  text-align: center;
+  color: var(--muted);
+}
+
+/* The pairs, the odd-or-even number and the asked symbol all sit on one card; its rule turns
+   green or red for a moment after each answer. */
+.symbols-card {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  max-height: 420px;
+  overflow: hidden;
+  background: var(--paper);
+  border: var(--rule);
+  transition: border-color 0.12s;
+}
+
+.symbols-card.is-right {
+  border-color: var(--stroop-green);
+}
+
+.symbols-card.is-wrong {
+  border-color: var(--stroop-red);
+}
+
+.symbols-pairs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px 40px;
+  margin: 0;
+  padding: 24px;
+  list-style: none;
+}
+
+.symbols-pairs li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 48px;
+  font-weight: 800;
+}
+
+.symbols-equals {
+  color: var(--muted);
+}
+
+/* Shrinks across the bottom of the card while the pairs are up. */
+.symbols-countdown {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 8px;
+  background: var(--red);
+  transform-origin: left;
+  animation: symbols-countdown linear forwards;
+}
+
+@keyframes symbols-countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.symbols-big {
+  font-size: clamp(72px, 14vw, 150px);
+  font-weight: 900;
+  line-height: 1;
+  animation: symbols-in 0.15s ease-out;
+}
+
+@keyframes symbols-in {
+  from {
+    opacity: 0;
+    transform: scale(0.94);
+  }
+}
+
+.symbols-feedback {
+  position: absolute;
+  bottom: 16px;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.is-right .symbols-feedback {
+  color: var(--stroop-green);
+}
+
+.is-wrong .symbols-feedback {
+  color: var(--stroop-red);
+}
+
+.symbols-actions {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+
+.symbols-actions .btn {
+  min-width: 180px;
+}
+
+.symbols-actions kbd {
+  margin-left: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.symbols-digits {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 10px;
+}
+
+.symbols-digit {
+  min-height: 72px;
+  border: var(--rule);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 28px;
+  font-weight: 800;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 0.08s;
+}
+
+.symbols-digit:hover {
+  transform: translateY(-2px);
+}
+
+.symbols-digit:active {
+  transform: translateY(1px);
+}
+
+/* After an answer, the other numbers step back so the picked one (and the right one, after a miss) stand out. */
+.has-feedback .symbols-digit:not(.is-chosen, .is-answer) {
+  opacity: 0.3;
+}
+
+.symbols-digit.is-chosen,
+.symbols-digit.is-answer {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 7px var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .symbols-big {
+    animation: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .symbols-status {
+    gap: 10px;
+    font-size: 16px;
+  }
+
+  .symbols-prompt {
+    font-size: 17px;
+  }
+
+  .symbols-card {
+    min-height: 160px;
+  }
+
+  .symbols-pairs li {
+    font-size: 36px;
+  }
+
+  .symbols-digits {
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+  }
+
+  .symbols-digit {
+    min-height: 56px;
+    font-size: 24px;
+  }
+
+  /* No keyboard on phones. */
+  .symbols-actions kbd {
+    display: none;
+  }
+}

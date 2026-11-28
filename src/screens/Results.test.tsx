@@ -3,7 +3,7 @@ import { screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { Route, Routes } from 'react-router'
 import { describe, expect, it } from 'vitest'
-import { GAME_IDS } from '../data/games.ts'
+import { dailyGames } from '../data/games.ts'
 import { createGuestState, recordResult } from '../state/store.ts'
 import type { AppState } from '../state/types.ts'
 import { makeResult, signedInState, TODAY } from '../test/fixtures.ts'
@@ -48,7 +48,7 @@ describe('Results', () => {
   it('shows the streak and a way back home once all the daily games are done', async () => {
     const user = userEvent.setup()
     let state = createGuestState(TODAY)
-    for (const id of GAME_IDS) state = recordResult(state, makeResult(id))
+    for (const id of dailyGames(TODAY)) state = recordResult(state, makeResult(id))
     renderResults(state)
 
     expect(screen.getByText(/All 4 done/)).toHaveTextContent('Your streak is now 1 day.')
