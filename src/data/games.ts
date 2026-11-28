@@ -1,6 +1,6 @@
 import type { DayKey } from '../lib/date.ts'
 
-export type GameId = 'memory' | 'numbers' | 'colors' | 'colorword'
+export type GameId = 'memory' | 'numbers' | 'colors' | 'colorword' | 'symbols'
 
 export interface GameInfo {
   id: GameId
@@ -23,6 +23,9 @@ export interface GameInfo {
 
 /** The day Color & Word joined the daily games (supabase/color_word.sql uses the same date). */
 export const COLORWORD_DAILY_FROM: DayKey = '2026-11-21'
+
+/** The day Symbol Recall joined the daily games. */
+export const SYMBOLS_DAILY_FROM: DayKey = '2026-11-28'
 
 export const GAMES: Record<GameId, GameInfo> = {
   memory: {
@@ -58,9 +61,18 @@ export const GAMES: Record<GameId, GameInfo> = {
     playable: true,
     dailyFrom: COLORWORD_DAILY_FROM,
   },
+  symbols: {
+    id: 'symbols',
+    name: 'Symbols',
+    title: 'Symbol Recall',
+    trains: 'Holding things in mind',
+    why: 'Keeping new pairs in mind through a distraction is the hard part of short-term memory. In a classic study, recall dropped sharply within 18 seconds once people were kept from rehearsing. (Peterson & Peterson, 1959, Journal of Experimental Psychology)',
+    playable: true,
+    dailyFrom: SYMBOLS_DAILY_FROM,
+  },
 }
 
-export const GAME_IDS: GameId[] = ['memory', 'numbers', 'colors', 'colorword']
+export const GAME_IDS: GameId[] = ['memory', 'numbers', 'colors', 'colorword', 'symbols']
 
 /** The games that make up the daily set on `day`. Finishing all of them adds the day to the streak. */
 export function dailyGames(day: DayKey): GameId[] {

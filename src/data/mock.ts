@@ -59,6 +59,7 @@ export function createDemoAccount(today: DayKey): AppState {
       numbers: [numbers(1150, 2, 124), numbers(1020, 6, 141), numbers(940, 11, 156)],
       colors: [colors(1080, 1, 5, 44), colors(990, 5, 5, 51), colors(760, 8, 4, 60)],
       colorword: [colorword(1110, 1, 20, 30), colorword(1020, 4, 19, 36), colorword(930, 7, 18, 41)],
+      symbols: [],
     },
     gamesPlayed: 57,
     lastResult: null,

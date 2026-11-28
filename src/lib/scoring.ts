@@ -48,3 +48,11 @@ export function numbersPoints({ seconds, wrongEntries = 0, hints = 0 }: Round & 
 export function colorWordPoints({ seconds, wrongAnswers = 0 }: Round & { wrongAnswers?: number }): number {
   return points({ seconds, mistakes: wrongAnswers })
 }
+
+/**
+ * Symbol Recall: every symbol asked, wrong numbers are the mistakes. `seconds` is the time spent
+ * answering only; studying and the odd-or-even task aren't timed.
+ */
+export function symbolsPoints({ seconds, wrongAnswers = 0 }: Round & { wrongAnswers?: number }): number {
+  return points({ seconds, mistakes: wrongAnswers })
+}

@@ -4,6 +4,7 @@ import ColorGame from '../games/colors/ColorGame.tsx'
 import ColorWordGame from '../games/colorword/ColorWordGame.tsx'
 import MemoryGame from '../games/memory/MemoryGame.tsx'
 import NumbersGame from '../games/numbers/NumbersGame.tsx'
+import SymbolsGame from '../games/symbols/SymbolsGame.tsx'
 import GamePlaceholder from '../games/GamePlaceholder.tsx'
 
 export default function Play() {
@@ -13,5 +14,6 @@ export default function Play() {
   if (gameId === 'memory') return <MemoryGame />
   if (gameId === 'numbers') return <NumbersGame />
   if (gameId === 'colorword') return <ColorWordGame />
+  if (gameId === 'symbols') return <SymbolsGame />
   return <GamePlaceholder key={gameId} gameId={gameId} />
 }

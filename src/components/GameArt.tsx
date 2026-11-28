@@ -14,6 +14,7 @@ export default function GameArt({ game, className }: { game: GameId; className?:
       {game === 'numbers' && <NumbersArt />}
       {game === 'colors' && <ColorsArt />}
       {game === 'colorword' && <ColorWordArt />}
+      {game === 'symbols' && <SymbolsArt />}
     </svg>
   )
 }
@@ -81,6 +82,37 @@ function ColorsArt() {
       <circle cx="79" cy="30" r="8" fill="var(--ink)" stroke="none" />
       <rect x="88" y="44" width="14" height="14" fill="var(--red)" stroke="none" />
       <rect x="84" y="40" width="22" height="22" fill="none" stroke="var(--red)" strokeWidth="2" />
+    </g>
+  )
+}
+
+function SymbolsArt() {
+  const pairs = [
+    { symbol: '★', number: '4' },
+    { symbol: '▲', number: '7' },
+    { symbol: '●', number: '2' },
+  ]
+  return (
+    <g>
+      {pairs.map((p, i) => (
+        <g key={p.symbol}>
+          <rect x={10 + i * 36} y="14" width="28" height="52" fill="var(--paper)" stroke="var(--ink)" strokeWidth="3" />
+          <text x={24 + i * 36} y="36" textAnchor="middle" fontSize="16" fill="var(--ink)">
+            {p.symbol}
+          </text>
+          <text
+            x={24 + i * 36}
+            y="58"
+            textAnchor="middle"
+            fontSize="16"
+            fontWeight="800"
+            fontFamily="var(--font)"
+            fill={i === 1 ? 'var(--red)' : 'var(--ink)'}
+          >
+            {i === 1 ? '?' : p.number}
+          </text>
+        </g>
+      ))}
     </g>
   )
 }
