@@ -70,6 +70,31 @@ describe('flushPending', () => {
     })
   })
 
+  it('uploads a Numbers game with its hints and wrong entries', async () => {
+    const { flushPending, queueResults } = await load()
+    const numbers = makeResult('numbers', 1170, {
+      id: '33333333-3333-3333-3333-333333333333',
+      finishedAt: '2026-11-23T16:00:00.000Z',
+      durationSec: 58,
+      hintsUsed: 1,
+      hintPenalty: 5,
+      stats: ['4 of 4 solved', '0:58', '1 wrong entry', '1 hint'],
+      highlight: '0:58',
+      details: { blanks: 4, wrongEntries: 1, hints: 1 },
+    })
+    queueResults(USER, [numbers])
+
+    expect(await flushPending(USER)).toEqual([])
+    expect(db.upserts[0][0]).toMatchObject({
+      game_id: 3,
+      score: 1170,
+      duration_sec: 58,
+      hints_used: 1,
+      hint_penalty: 5,
+      details: { highlight: '0:58', blanks: 4, wrongEntries: 1, hints: 1 },
+    })
+  })
+
   it('keeps a game the database does not list yet queued, and still uploads the others', async () => {
     db.games = db.games.filter((g) => g.category !== 'colorword')
     const { flushPending, queueResults } = await load()

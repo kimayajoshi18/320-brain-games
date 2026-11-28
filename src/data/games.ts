@@ -39,7 +39,7 @@ export const GAMES: Record<GameId, GameInfo> = {
     title: 'Number Grid',
     trains: 'Thinking with numbers',
     why: 'Number puzzles make you hold and update numbers in your head, which is a working memory skill.',
-    playable: false,
+    playable: true,
   },
   colors: {
     id: 'colors',
